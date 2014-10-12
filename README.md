@@ -10,3 +10,5 @@ http://www.magentocommerce.com/magento-connect/atos-sips-pro.html
 
 Documentation (Installation) :
 http://www.mageho.com/index.php/downloadable/download/sample/sample_id/1/
+
+(Thanks to Mister David Demonchy for the documentation)
