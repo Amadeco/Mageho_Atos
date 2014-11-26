@@ -14,7 +14,6 @@
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
  * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
- * @version      Release: 1.0.8.3
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
@@ -28,13 +27,17 @@
 
 <ul class="messages">
 	<?php if (isset($hash['response_code'])): ?>
+	
 		<?php if ($hash['response_code'] == '00'): ?>
 	    <li class="success-msg"><?php echo $hlpr->__('Payment accepted by Atos'); ?></li>
 	    <?php else: ?>
 	    <li class="warning-msg"><?php echo $hlpr->__('Customer was rejected by Atos'); ?></li>
 	    <?php endif; ?>
+	    
     <?php else: ?>
+    
     <li class="warning-msg"><?php echo $hlpr->__('The customer left without paying'); ?></li>
+    
     <?php endif; ?>
 </ul>
 
@@ -49,7 +52,12 @@
 ?>
 <?php if (isset($response['transaction_id'], $response['response_code'])): ?>
 
-<div class="more"><a href="#response" onclick="Effect.toggle('response', 'blind'); return false;"><?php echo Mage::helper('atos')->__('More Informations'); ?></a></div>
+<div class="more">
+	<a href="#response" onclick="Effect.toggle('response', 'blind'); return false;">
+		<?php echo Mage::helper('atos')->__('More Informations'); ?>
+	</a>
+</div>
+
 <div id="response" style="display:none">
 	<table class="atowps">
 		<tbody>
@@ -57,29 +65,12 @@
             	<td class="payment-means first"><img src="<?php echo $this->getCreditCardImgSrc(strtolower($hash['payment_means'])); ?>" alt="<?php echo $hash['payment_means']; ?>" /></td>
                 <td class="payment-infos last">
 					<ul>
-			        	<li><?php echo $response['transaction_id']; ?></li>
-			        	
-			            <li><?php echo $response['amount']; ?></li>
-			            
-			            <li><?php echo $response['capture_mode']; ?></li>
-			            
-			            <li><?php echo $response['capture_day']; ?></li>
-			            
-			            <?php if (isset($response['card_number'])): ?>
-			            <li><?php echo $response['card_number']; ?></li>
-			            <?php endif; ?>
-			            
-			            <li><?php echo $response['cvv_response_code']; ?></li>
-			            
-			            <li><?php echo $response['response_code']; ?></li>
-			            
-			            <?php if (! empty($hash['bank_response_code'])): ?>
-			            <li><?php echo $response['bank_response_code']; ?></li>
-			            <?php endif; ?>
-			            
-			            <?php if (isset($response['complementary_code'])): ?>
-			            <li><?php echo $response['complementary_code']; ?></li>
-			            <?php endif; ?>
+						<?php foreach ($response as $key => $value): ?>
+							<?php if (strpos($key, '_raw')): continue; endif; ?>
+							<?php if (isset($response[$key])): ?>
+							<li><?php echo $response[$key]; ?>
+							<?php endif; ?>
+						<?php endforeach; ?>
                 	</ul>
                 </td>
         	</tr>
