@@ -52,10 +52,12 @@ class Mageho_Atos_Block_Adminhtml_System_Config_Fieldset_Securecode
             	$field->setRule($model)
             		->setRenderer(Mage::getBlockSingleton('rule/conditions'));
             	
-				$html.= '<tr>';
-				$html.= '	<td class="label">' . $field->getLabel() . '</td>';
-				$html.= '	<td class="value" colspan="2">' . $field->toHtml() . '</td>';
-				$html.= '</tr>';
+				$html.= '<tr id="row_' . $field->getId() . '">' .
+							'	<td class="label"><label for="' . $field->getId() . '">' . $field->getLabel() . '</label></td>' . 
+							'	<td class="value"><div id="' . $field->getId() . '">' . $field->toHtml() . '</div></td>' . 
+							'	<td class="scope-label">' . $field->getScopeLabel() . '</td>' . 
+							'	<td class=""></td>' . 
+							'</tr>';
 			} else {
 				$html.= $field->toHtml();
 			}

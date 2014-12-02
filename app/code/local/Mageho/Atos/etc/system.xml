@@ -172,6 +172,9 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+							<depends>
+								<bypass_enabled>1</bypass_enabled>
+							</depends>
                     	</conditions>
                     </fields>
                 </securecode>
@@ -350,11 +353,13 @@
                             <label>Capture Day</label>
 							<comment><![CDATA[Between 0 and 99 - Notice : Be careful, when you exceed 7 days, the transaction account for two]]></comment>
                             <frontend_type>text</frontend_type>
-							<depends><capture_mode>AUTHOR_CAPTURE</capture_mode></depends>
 							<sort_order>90</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
+							<depends>
+								<capture_mode>AUTHOR_CAPTURE</capture_mode>
+							</depends>
 						</capture_day>
 						<cms_block translate="label">
 							<label>Display a CMS block inside the payment form</label>
