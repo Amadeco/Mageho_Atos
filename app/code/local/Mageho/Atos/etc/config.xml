@@ -21,7 +21,7 @@
 <config>
     <modules>
         <Mageho_Atos>
-            <version>1.0.8.5</version>
+            <version>1.0.8.6</version>
         </Mageho_Atos>
     </modules>
     <global>
