@@ -63,8 +63,7 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
 					if ($this->getAtosPaymentStandard()->getConfig()->order_status_payment_canceled == Mage_Sales_Model_Order::STATE_CANCELED && $order->canCancel()) {
 						$order->cancel();
 					}
-							
-					$this->saveTransaction($order->getPayment());
+					
 					$order->save();
 				}
 					
@@ -121,7 +120,12 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
 		switch ($this->getAtosResponse('response_code'))
 		{
 		    case '00':
-                if ($order->getId()) {
+                if ($order->getId()) 
+                {
+					if (!$status = $this->getAtosPaymentStandard()->getConfig()->order_status_payment_accepted) {
+						$status = $order->getStatus();
+					}
+					
                     $order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
                           ->save();
                 }

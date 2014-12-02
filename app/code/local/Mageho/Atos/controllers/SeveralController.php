@@ -65,9 +65,21 @@ class Mageho_Atos_SeveralController extends Mageho_Atos_Controller_Action
 			case '17':
 				if ($order->getId()) 
 				{
-					$order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Order was canceled by customer.'))
-						->cancel()
-						->save();
+					if (!$status = $this->getAtosPaymentSeveral()->getConfig()->order_status_payment_canceled) {
+						$status = $order->getStatus();
+					}
+							
+					$order->addStatusToHistory($status, Mage::helper('atos')->__('Order was canceled by customer.'), false);
+						
+					if ($this->getAtosPaymentSeveral()->getConfig()->order_status_payment_canceled == Mage_Sales_Model_Order::STATE_HOLDED && $order->canHold()) {
+						$order->hold();
+					}
+							
+					if ($this->getAtosPaymentSeveral()->getConfig()->order_status_payment_canceled == Mage_Sales_Model_Order::STATE_CANCELED && $order->canCancel()) {
+						$order->cancel();
+					}
+
+					$order->save();
 				}
 					
 				$error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')) . '<br />';
@@ -120,8 +132,13 @@ class Mageho_Atos_SeveralController extends Mageho_Atos_Controller_Action
 		switch ($this->getAtosResponse('response_code'))
 		{
 		    case '00':
-                if ($order->getId()) {
-                    $order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
+                if ($order->getId()) 
+                {
+					if (!$status = $this->getAtosPaymentSeveral()->getConfig()->order_status_payment_accepted) {
+						$status = $order->getStatus();
+					}
+	                
+                    $order->addStatusToHistory($status, Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
                           ->save();
                 }
 				$this->getCheckoutSession()->getQuote()->setIsActive(false)->save();
@@ -180,7 +197,7 @@ class Mageho_Atos_SeveralController extends Mageho_Atos_Controller_Action
 	        $blockAtosPaymentFailure->setTitle($this->getAtosSession()->getRedirectTitle())
 	        	->setMessage($this->getAtosSession()->getRedirectMessage());
         }
-        	
+        
         $paymentMeans = $this->getAtosSession()->getAtosSeveralPaymentMeans();
         
    		Mage::dispatchEvent('atos_controller_several_failure_render_before', array(
