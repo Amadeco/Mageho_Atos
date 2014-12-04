@@ -297,13 +297,32 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $datafields;
     }
 	
+	/*
+	 *
+	 *
+	 * Generate DATA fields for request
+	 *
+	 *
+	 */
 	public function getDatafield($datafieldToAdd = null)
 	{
 		$datafield = Mage::getStoreConfig($this->_getSpecificConfigPath('datafield'), $this->_storeId);
 		
-		if ( ! is_null($datafieldToAdd) ) {
+		if (isset($datafieldToAdd) && !empty($datafieldToAdd)) 
+		{
 			foreach ($datafieldToAdd as $key => $value) {
 				$datafield.= ',' . $key . '=' . $value;
+			}
+		}
+		
+		/* Donnée spécifique PayPal: Le numéro de commande PayPal */
+		if ($paymentMeans = $this->getAtosSession()->getAtosStandardPaymentMeans()
+		 && $paymentMeans == 'PAYPAL') 
+		{
+			if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) 
+			{
+				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
+				$datafield.= ',PP_INVOICEID=' . $orderId;
 			}
 		}
 		
@@ -314,14 +333,11 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		{
 			$rule = Mage::getModel('salesrule/rule');
 			$rule->loadPost(unserialize($this->getConfig()->conditions));
-        
+
 			$object = new Varien_Object(array('quote' => $this->_getQuote()));
 			
 			if ($rule->validate($object)) {
 				$datafield.= ',3D_BYPASS';
-				// Mage::getSingleton('atos/debug')->log(Mage::helper('atos')->__('3D_BYPASS parameter was added.'));
-			} else {
-				// Mage::getSingleton('atos/debug')->log(Mage::helper('atos')->__('3D_BYPASS parameter was not added.'));
 			}
 		}
 		
@@ -360,6 +376,9 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 				break;
 				case 'paylib':
 					return $url . 'PAYLIB.gif';
+				break;
+				case 'paypal':
+					return $url . 'PAYPAL.gif';
 				break;
 			}
 		} else {

@@ -19,7 +19,30 @@
 
 class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 {
-	/* Bank Response Label */
+	/* Response label from bank */
+	const RESPONSE_AUTHORIZATION_ACCEPTED = 'Authorization accepted';
+	const RESPONSE_PERMISSION_DENIED = 'Permission denied';
+	const RESPONSE_INVALID_TRANSACTION = 'Invalid transaction';
+	const RESPONSE_PAYMENT_CANCELED_CUSTOMER = 'Payment canceled by the customer';
+	const RESPONSE_FORMAT_ERROR = 'Format error';
+	const RESPONSE_NUMBER_ATTEMPTS_CREDIT_CARD_NUMBER_EXCEEDED = 'Number of attempts to enter the card number exceeded';
+	const RESPONSE_SERVICE_TEMPORARILY_UNAVAILABLE = 'Service temporarily unavailable';
+	const RESPONSE_TRANSACTION_ALREADY_REGISTERED = 'Transaction already registered';
+	
+	/* Response label from paypal */
+	const PAYPAL_RESPONSE_AUTHORIZATION_ACCEPTED = 'PayPal authorization accepted';
+	const PAYPAL_RESPONSE_PERMISSION_DENIED = 'PayPal permission denied';
+	const PAYPAL_RESPONSE_BANK_INVALID_REQUEST = 'PayPal invalid request - Bank side problem';
+	const PAYPAL_RESPONSE_PAYPAL_INVALID_REQUEST = 'PayPal invalid request - Paypal side problem';
+	const PAYPAL_RESPONSE_OPERATION_IMPOSSIBLE = 'Operation impossible - Expired transaction'
+	const PAYPAL_RESPONSE_PROHIBITED_TRANSACTION = 'PayPal prohibited transaction';
+	const PAYPAL_RESPONSE_NSF_ACCOUNT = 'NSF Account';
+	const PAYPAL_RESPONSE_TEMPORARILY_UNAVAILABLE = 'PayPal service temporarily unavailable';
+	const PAYPAL_RESPONSE_FAILED_CONNECTION = 'Connection to PayPal failed';
+	const PAYPAL_RESPONSE_FIELD_APPLICATION_ALREADY_USED = 'One of the fields of the application is already used for another transaction';
+	const PAYPAL_RESPONSE_TECHNICAL_ERROR = 'Technical error';
+	
+	/* Bank response label */
 	const BANK_RESPONSE_SUCCESS = 'Transaction approved or successfully treated';
     const BANK_RESPONSE_EXCEEDING_AUTHORIZED = 'Exceeding the authorized ceiling on the map';
     const BANK_RESPONSE_INVALID_MERCHANT_ID = 'Invalid merchant id or e-commerce contract nonexistent';
@@ -54,18 +77,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
     const BANK_RESPONSE_DEADLINE_DELAY_GLOBAL_SURVEILLANCE = 'Deadline for the delay global surveillance';
     const BANK_RESPONSE_SERVER_UNAVAILABLE_NETWORK = 'Server unavailable network routing application again';
     const BANK_RESPONSE_INCIDENT_DOMAIN_INITIATOR = 'Incident domain initiator';
-
-	/* Response Label from the bank server */
-	const RESPONSE_AUTHORIZATION_ACCEPTED = 'Authorization accepted';
-	const RESPONSE_PERMISSION_DENIED = 'Permission denied';
-	const RESPONSE_INVALID_TRANSACTION = 'Invalid transaction';
-	const RESPONSE_PAYMENT_CANCELED_CUSTOMER = 'Payment canceled by the customer';
-	const RESPONSE_FORMAT_ERROR = 'Format error';
-	const RESPONSE_NUMBER_ATTEMPTS_CREDIT_CARD_NUMBER_EXCEEDED = 'Number of attempts to enter the card number exceeded';
-	const RESPONSE_SERVICE_TEMPORARILY_UNAVAILABLE = 'Service temporarily unavailable';
-	const RESPONSE_TRANSACTION_ALREADY_REGISTERED = 'Transaction already registered';
 	
-	/* CVV Response Label from the bank server */
+	/* CVV response label from bank */
 	const CVV_RESPONSE_INCORRECT = 'Incorrect CVV';
 	const CVV_RESPONSE_NO_DATA = 'No data on CVV';
 	const CVV_RESPONSE_TREATED = 'Proper control number';
@@ -195,19 +208,17 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	{
 		$hlpr = Mage::helper('atos');
 	
-	    $return = array();
-	    
-		$return['transaction_id'] = $hlpr->__('Transaction Number') . ' : ' . $response['transaction_id'];
-		
-		$return['amount'] = $hlpr->__('Total') . ' : ' . $response['amount'];
-		
-		$return['payment_means'] = $hlpr->__('Type of credit card') . ' : ' . $response['payment_means'];
+	    $return = array(
+		    'transaction_id' => $hlpr->__('Transaction Number') . ' : ' . $response['transaction_id'],
+		    'amount' => $hlpr->__('Total') . ' : ' . $response['amount'],
+		    'payment_means' => $hlpr->__('Type of credit card') . ' : ' . $response['payment_means']
+	    );
 		
 		if (isset($response['capture_mode']) && !empty($response['capture_mode'])) {
 			$return['capture_mode'] = $hlpr->__('Capture Mode') . ' : ' . $response['capture_mode'];
 		}
 		
-		if (isset($response['capture_day'])  && !empty($response['capture_day']) && $response['capture_day'] > 0)
+		if (isset($response['capture_day'])  && $response['capture_day'] > 0)
 		{
 		    $return['capture_day'] = $hlpr->__('Day before the capture') . ' : ' . $response['capture_day'];
 		} else {
@@ -222,24 +233,24 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 		
 		if (isset($response['cvv_response_code'])) 
 		{
-			$return['cvv_response_code'] = $hlpr->__('About CVV credit card') . ' : ' . self::getCvvResponseLabel($response['cvv_response_code']);
-			$return['cvv_response_code_raw'] = self::getCvvResponseLabel($response['cvv_response_code']);
+			$return['cvv_response_code'] = $hlpr->__('About CVV credit card') . ' : ' . self::getCvvResponseLabel($response);
+			$return['cvv_response_code_raw'] = self::getCvvResponseLabel($response);
 		}
 		
 		if (isset($response['response_code'])) 
 		{	
-		    $return['response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getResponseLabel($response['response_code']);
-			$return['response_code_raw'] = self::getResponseLabel($response['response_code']); 
+		    $return['response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getResponseLabel($response);
+			$return['response_code_raw'] = self::getResponseLabel($response); 
 		}
 		
 	    if (isset($response['bank_response_code'])) 
 	    {
-			$return['bank_response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getBankResponseLabel($response['bank_response_code']);
-			$return['bank_response_code_raw'] = self::getBankResponseLabel($response['bank_response_code']);
+			$return['bank_response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getBankResponseLabel($response);
+			$return['bank_response_code_raw'] = self::getBankResponseLabel($response);
 		}
 
 		if (isset($response['complementary_code']) 
-			&& ($complementary_code = self::getComplementaryCode($response['complementary_code']))) 
+			&& ($complementary_code = self::getComplementaryCode($response))) 
 		{
 			$return['complementary_code'] = $hlpr->__('Additional control') . ' : ' . $complementary_code;
 			$return['complementary_code_raw'] = $complementary_code;
@@ -249,6 +260,11 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 		{
 			$return['data'] = $response['data'];
 			
+			/*
+			 *
+			 * Paiement en plusieurs fois
+			 *
+			 */
 			if ($response['capture_mode'] == 'PAYMENT_N')
 			{
 				foreach(explode(';', $response['data']) as $value)
@@ -270,7 +286,12 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 						break;
 						case 'PAYMENT_DUE_DATES':
 						    $date = explode(',', $data[1]);
-							$return['payment_due_dates'] = array($this->formatDate($date[0]), $this->formatDate($date[1]), $this->formatDate($date[2]));
+						    
+							$return['payment_due_dates'] = array(
+								$this->formatDate($date[0]), 
+								$this->formatDate($date[1]), 
+								$this->formatDate($date[2])
+							);
 						break;
 					}
 				}
@@ -286,10 +307,42 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
      *
      * @return string
      */
-	public function getResponseLabel($code) 
+	public function getResponseLabel($response) 
 	{
+		$responseCode = $response['response_code'];
+		$bankResponseCode = $response['bank_response_code'];
+		$paymentMeans = $response['payment_means'];
+		
 		$hlpr = Mage::helper('atos');
-		switch ($code) 
+		
+		if ($paymentMeans == 'PAYPAL')
+		{
+			if ($bankResponseCode == '00' && $responseCode == '00') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_AUTHORIZATION_ACCEPTED);
+			} elseif ($bankResponseCode == '05' && $responseCode == '05') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_PERMISSION_DENIED);
+			} elseif ($bankResponseCode == '' && $responseCode == '12') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_BANK_INVALID_REQUEST);
+			} elseif ($bankResponseCode == '12' && $responseCode == '12') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_PAYPAL_INVALID_REQUEST);
+			} elseif ($bankResponseCode == '24' && $responseCode == '05') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_OPERATION_IMPOSSIBLE);
+			} elseif ($bankResponseCode == '40' && $responseCode == '05') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_PROHIBITED_TRANSACTION);
+			} elseif ($bankResponseCode == '51' && $responseCode == '05') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_NSF_ACCOUNT);
+			} elseif ($bankResponseCode == '90' && $responseCode == '90') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_TEMPORARILY_UNAVAILABLE);
+			} elseif ($bankResponseCode == '' && $responseCode == '90') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_FAILED_CONNECTION);
+			} elseif ($bankResponseCode == '94' && $responseCode == '05') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_FIELD_APPLICATION_ALREADY_USED);
+			} elseif ($bankResponseCode == '' && $responseCode == '99') {
+				return $hlpr->__(self::PAYPAL_RESPONSE_TECHNICAL_ERROR);
+			}
+		}
+		
+		switch ($responseCode) 
 		{
 			case '00':
 				return $hlpr->__(self::RESPONSE_AUTHORIZATION_ACCEPTED);
@@ -310,11 +363,11 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 				return $hlpr->__(self::RESPONSE_SERVICE_TEMPORARILY_UNAVAILABLE);
 			case '94':
 				return $hlpr->__(self::RESPONSE_TRANSACTION_ALREADY_REGISTERED);
-			default:
-				if (isset($code)) {
-					return $code;
-				}
 				break;
+		}
+		
+		if (isset($responseCode)) {
+			return $responseCode;
 		}
 	}
 
@@ -323,10 +376,12 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
      *
      * @return string
      */
-	public function getBankResponseLabel($code) 
+	public function getBankResponseLabel($response) 
 	{
+		$bankResponseCode = $response['bank_response_code'];
+		
 		$hlpr = Mage::helper('atos');
-		switch ($code) 
+		switch ($bankResponseCode) 
 		{
 			case '00':	return $hlpr->__(self::BANK_RESPONSE_SUCCESS);
 			case '02':	return $hlpr->__(self::BANK_RESPONSE_EXCEEDING_AUTHORIZED);
@@ -365,8 +420,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			case '98':	return $hlpr->__(self::BANK_RESPONSE_SERVER_UNAVAILABLE_NETWORK);
 			case '99':	return $hlpr->__(self::BANK_RESPONSE_INCIDENT_DOMAIN_INITIATOR);
 			default:
-				if (isset($code)) {
-					return $code;
+				if (isset($bankResponseCode)) {
+					return $bankResponseCode;
 				}
 				break;
 		}
@@ -378,10 +433,12 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
      *
      * @return string
      */
-	public function getCvvResponseLabel($code) 
+	public function getCvvResponseLabel($response) 
 	{
+		$cvvResponseCode = $response['cvv_response_code'];
+		
 		$hlpr = Mage::helper('atos');
-		switch ($code) {
+		switch ($cvvResponseCode) {
 			case '4E':
 			case '':
 				return $hlpr->__(self::CVV_RESPONSE_INCORRECT);
@@ -398,8 +455,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			case 'NO':
 				return $hlpr->__(self::CVV_RESPONSE_NO_CVV_ON_CREDIT_CARD);
 			default:
-				if (isset($code)) {
-					return $code;
+				if (isset($cvvResponseCode)) {
+					return $cvvResponseCode;
 				}
 				break;
 		}
@@ -408,10 +465,12 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	/**
      * @return string
      */
-	public function getComplementaryCode($code)
+	public function getComplementaryCode($response)
 	{
+		$complementaryCode = $response['complementary_code'];
+		
 		$hlpr = Mage::helper('atos');
-		switch ($code) 
+		switch ($complementaryCode) 
 		{
 			case '00':
 				return $hlpr->__(self::COMPLEMENTARY_CODE_ALL_SUCCESS);
@@ -426,8 +485,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			case '99':
 				return $hlpr->__(self::COMPLEMENTARY_CODE_PROBLEM_ADDITIONAL_LOCAL_CONTROLS);
 			default:
-				if (isset($code)) {
-					return $code;
+				if (isset($complementaryCode)) {
+					return $complementaryCode;
 				}
 				break;
 	    }
@@ -452,7 +511,11 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 					break;
 					case 'PAYMENT_DUE_DATES':
 						$date = explode(',', $data[1]);
-						$return['payment_due_dates'] = array($this->formatDate($date[0]), $this->formatDate($date[1]), $this->formatDate($date[2]));
+						$return['payment_due_dates'] = array(
+							$this->formatDate($date[0]), 
+							$this->formatDate($date[1]), 
+							$this->formatDate($date[2])
+						);
 					break;
 				}
 			}
@@ -463,7 +526,9 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	public function formatDate($date, $format = 'medium')
 	{
 		if ($date = explode('/', $date)) {
-	    	$newDate = substr($date[0], 0, 4) . '-' . substr($date[0], 4, 2) . '-' . substr($date[0], 6, 2); // as follows : year-month-day
+			/* as follows : year-month-day */
+	    	$newDate = substr($date[0], 0, 4) . '-' . substr($date[0], 4, 2) . '-' . substr($date[0], 6, 2);
+	    	
 			return Mage::helper('core')->formatDate($newDate, $format, false);
 		}
 	}
