@@ -175,35 +175,79 @@
 						<name><![CDATA[Dollarde Singapour]]></name>
 					</SGD>
 				</currencies>
+				
+				<!--
+					Le champ data, transmis lors de la requête de paiement (cf. DICTIONNAIRE DES DONNEES), 
+					peut être renseigné avec différents mots clés. Si vous souhaitez utiliser plusieurs mots clés dans le champ data, 
+					vous devez les séparer par un point virgule (exemple : CARD_NO_LOGO;NO_COPYRIGHT).
+				-->
 				<datafield>
+					<!--
+						Ce mot clé supprime l’affichage du logo de la carte bancaire sur la page de saisie des coordonnées bancaires de l’internaute.
+					-->
 					<CARD_NO_LOGO>
 						<code>CARD_NO_LOGO</code>
 						<name>CARD_NO_LOGO</name>
 					</CARD_NO_LOGO>
+					
+					<!--
+						Ce mot clé supprime la ligne « Copyright © 2004, all rights reserved » de toutes les pages affichées par le serveur Sogenactif Paiement Web.
+					-->
 					<NO_COPYRIGHT>
 						<code>NO_COPYRIGHT</code>
 						<name>NO_COPYRIGHT</name>
 					</NO_COPYRIGHT>
+					
+					<!--
+						Ce mot clé supprime le réaffichage du numéro de la carte bancaire si l’internaute revient sur la page de saisie des coordonnées bancaires en cliquant sur le bouton « BACK » de son navigateur. Cette option est conseillée si les internautes font partie d’une population utilisant des ordinateurs en libre service (Etudiants d’université, clients de cyber-café,...)
+					-->
 					<NO_DISPLAY_CARD>
 						<code>NO_DISPLAY_CARD</code>
 						<name>NO_DISPLAY_CARD</name>
 					</NO_DISPLAY_CARD>
+					
+					<!--
+						Ce mot clé supprime l’affichage du bouton « ANNULATION – RETOUR A LA BOUTIQUE » de la page de saisie du numéro de carte.
+					-->
 					<NO_DISPLAY_CANCEL>
 						<code>NO_DISPLAY_CANCEL</code>
 						<name>NO_DISPLAY_CANCEL</name>
 					</NO_DISPLAY_CANCEL>
+					
+					<!--
+						Ce mot clé remplace la ligne contenant les symboles de sécurisation SSL au dessus du cadre de saisie de la carte, par la phrase 
+						« Vous êtes connecté à un serveur sécurisé, vous pouvez remplir votre formulaire en toute confiance ». 
+						Vous pouvez activer cette option lorsque les pages de paiement s’affichage à l’intérieur de frames, 
+						car dans ce cas le navigateur n’affichent plus, en bas à gauche, les symboles signalant que vous êtes sur une page sécurisée.
+					-->
 					<NO_SSL_SYMBOLS>
 						<code>NO_SSL_SYMBOLS</code>
 						<name>NO_SSL_SYMBOLS</name>
 					</NO_SSL_SYMBOLS>
+					
+					<!--
+						Ce mot clé supprime l’affichage, sur la page d’acceptation, 
+						de la phrase : « Suivant le paramétrage de votre navigateur, une fenêtre indiquant le retour en mode non sécurisé peut apparaître. 
+						Ceci n'a aucun impact sur la confidentialité des informations précédemment échangées. »
+					-->
 					<NO_WINDOWS_MSG>
 						<code>NO_WINDOWS_MSG</code>
 						<name>NO_WINDOWS_MSG</name>
 					</NO_WINDOWS_MSG>
+					
+					<!-- 
+						Ce mot clé supprime l’affichage de l’url sur la page d’acceptation. 
+					-->
 					<NO_DISPLAY_URL>
 						<code>NO_DISPLAY_URL</code>
 						<name>NO_DISPLAY_URL</name>
 					</NO_DISPLAY_URL>
+					
+					<!--
+						Ce mot clé supprime l’affichage de la page de réponse à l’internaute. 
+						Il est ainsi directement reconnecté à la boutique du commerçant, sur l’URL paramétrée dans le champ normal_return_url 
+						ou cancel_return_url suivant que la transaction a été acceptée ou refusée.
+					-->
 					<NO_RESPONSE_PAGE>
 						<code>NO_RESPONSE_PAGE</code>
 						<name>NO_RESPONSE_PAGE</name>
@@ -272,6 +316,10 @@
 						<code>PAYLIB</code>
 						<name><![CDATA[Paylib]]></name>
 					</PAYLIB>
+					<PAYPAL>
+						<code>PAYPAL</code>
+						<name><![CDATA[PayPal]]></name>
+					</PAYPAL>
 				</payment_means>
         	</atos>
         </payment>
