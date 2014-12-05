@@ -34,7 +34,7 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	const PAYPAL_RESPONSE_PERMISSION_DENIED = 'PayPal permission denied';
 	const PAYPAL_RESPONSE_BANK_INVALID_REQUEST = 'PayPal invalid request - Bank side problem';
 	const PAYPAL_RESPONSE_PAYPAL_INVALID_REQUEST = 'PayPal invalid request - Paypal side problem';
-	const PAYPAL_RESPONSE_OPERATION_IMPOSSIBLE = 'Operation impossible - Expired transaction'
+	const PAYPAL_RESPONSE_OPERATION_IMPOSSIBLE = 'Operation impossible - Expired transaction';
 	const PAYPAL_RESPONSE_PROHIBITED_TRANSACTION = 'PayPal prohibited transaction';
 	const PAYPAL_RESPONSE_NSF_ACCOUNT = 'NSF Account';
 	const PAYPAL_RESPONSE_TEMPORARILY_UNAVAILABLE = 'PayPal service temporarily unavailable';
