@@ -202,7 +202,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 	
     /**
-     * Récupère un tableau des devises autorisées
+     * RÃ©cupÃ¨re un tableau des devises autorisÃ©es
      *
      * @return array $currencies
      */
@@ -232,7 +232,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /**
-     * Récupère un tableau des langages autorisées
+     * RÃ©cupÃ¨re un tableau des langages autorisÃ©es
      *
      * @return array $languages
      */
@@ -270,7 +270,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /**
-     * Récupère un tableau des modes de paiement autorisés
+     * RÃ©cupÃ¨re un tableau des modes de paiement autorisÃ©s
      *
      * @return array $paymentMeans
      */
@@ -284,7 +284,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 	
     /**
-     * Récupère un tableau des mots clés du champ data 
+     * RÃ©cupÃ¨re un tableau des mots clÃ©s du champ data 
      *
      * @return array $datafields
      */
@@ -315,13 +315,13 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 			}
 		}
 		
-		/* Donnée spécifique PayPal: Le numéro de commande PayPal */
+		/* DonnÃ©e spÃ©cifique PayPal: Le numÃ©ro de commande PayPal */
 		if ($paymentMeans = $this->getAtosSession()->getAtosStandardPaymentMeans()
-		 && $paymentMeans == 'PAYPAL') 
+		 && isset($paymentMeans) && $paymentMeans == 'PAYPAL') 
 		{
 			if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) 
 			{
-				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
+				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractÃ¨res et contenir des caractÃ¨res alpha-numÃ©riques */
 				$datafield.= ',PP_INVOICEID=' . $orderId;
 			}
 		}
