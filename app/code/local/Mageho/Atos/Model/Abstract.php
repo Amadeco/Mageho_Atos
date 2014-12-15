@@ -201,6 +201,32 @@ class Mageho_Atos_Model_Abstract extends Mage_Payment_Model_Method_Abstract
      */
     protected function _getCustomerIpAddress() 
     {
-        return $this->_getQuote()->getRemoteIp();
+        $ip = $this->_getQuote()->getRemoteIp();
+        
+        # Determine originating IP address. REMOTE_ADDR is the standard
+        # but will fail if the user is behind a proxy. HTTP_CLIENT_IP and/or
+        # HTTP_X_FORWARDED_FOR are set by proxies so check for these before
+        # falling back to REMOTE_ADDR. HTTP_X_FORWARDED_FOR may be a comma-
+        # delimited list in the case of multiple chained proxies; the first is
+        # the originating IP.
+        #
+        # Security note: do not use if IP spoofing is a concern for your
+        # application. Since remote_ip checks HTTP headers for addresses forwarded
+        # by proxies, the client may send any IP. remote_addr can't be spoofed but
+        # also doesn't work behind a proxy, since it's always the proxy's IP.
+        # @see http://metautonomo.us/2008/05/30/the-local_request-that-isnt/
+
+        $reg_priv_network = '/^unknown$|^(10|172\.(1[6-9]|2[0-9]|30|31)|192\.168)\./i';
+        if (strpos($ip, ',') !== false) {
+            $_ips = explode(',', $ip);
+            foreach($_ips as $_ip) {
+                $_ip = trim($_ip);
+                if (! preg_match($reg_priv_network, $_ip, $matches )) {
+                    return $_ip;
+                }
+            }
+        }
+        
+        return $ip;
     }
 }
