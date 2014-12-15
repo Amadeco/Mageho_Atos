@@ -95,7 +95,15 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	const COMPLEMENTARY_CODE_NOT_SAME_NATIONALITY = 'The card number is not in range of the same nationality as the merchant';
 	const COMPLEMENTARY_CODE_PROBLEM_ADDITIONAL_LOCAL_CONTROLS = 'The bank server has a problem when processing an additional local controls';
 	
-	protected $_error;
+	/* Transaction condition */
+	const TRANSACTION_CONDITION_3D_SUCCESS = 'The merchant and the cardholder is enrolled in the 3-D Secure program and the holder is authenticated correctly';
+	const TRANSACTION_CONDITION_3D_FAILURE = 'The merchant and the cardholder is enrolled in the 3-D Secure program but the buyer has failed to authenticate (bad password)';
+	const TRANSACTION_CONDITION_3D_ERROR = 'The trader involved in the 3-D Secure program but the payment server encountered a technical problem during the authentication process (when checking registration card 3D program or holder authentication)';
+	const TRANSACTION_CONDITION_3D_NOTENROLLED = "The trader involved in the 3-D Secure program but the wearer's card is not enrolled";
+	const TRANSACTION_CONDITION_3D_ATTEMPT = 'The merchant and the cardholder is enrolled in the 3-D Secure program but the buyer did not have to authenticate (the bank access control server that issued the card does not implement the generation of proof of authentication attempt)';
+	const TRANSACTION_CONDITION_SSL = 'The buyer has not authenticated to one of the following reasons: 1- The type of card is not supported by the program 3-D Secure 2- The merchant or the cardholder is not enrolled in the program 3-D Secure';
+	
+	protected $_error = false;
 	protected $_debug;
 	
 	/*
@@ -124,11 +132,6 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			
 			$response = shell_exec("$pathBinResponse $command 2>&1");
 			$hash = $this->hash($response);
-			
-			
-			Mage::log("$pathBinResponse $command 2>&1");
-			Mage::log(Zend_Debug::dump($hash, 'atos', false));
-        
 	
 			/* Error from server bank response */
 			if ( ! isset($hash['code']) || (isset($response['code']) && $response['code'] != 0) ) {
@@ -139,6 +142,7 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 		} catch (Exception $e) {
 			$this->_error = true;
 			$this->_debug = $e->getMessage();
+			
 			Mage::getSingleton('atos/debug')->log($this->_debug);
 			Mage::helper('checkout')->sendPaymentFailedEmail($this->getQuote(), $this->_debug);
 		}
@@ -181,6 +185,15 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			'capture_day' => $response[30],
 			'capture_mode' => $response[31],
 			'data' => $response[32],
+			'order_validity' => $response[33],
+			'transaction_condition' => $response[34],
+			'statement_reference' => $response[35],
+			'card_validity' => $response[36],
+			'score_value' => $response[37],
+			'score_color' => $response[38],
+			'score_info' => $response[39],
+			'score_threshold' => $response[40],
+			'score_profile' => $response[41],
 			'response_raw' => $response_raw
 		);
 		
@@ -201,7 +214,7 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	
 	/*
 	 *
-	 * TO DO : refactory this function (19/09/2014 21:32)
+	 * TO DO : refactory this function (15/12/2014 21:11)
 	 *
 	 */
 	public function decodeResponse($response) 
@@ -218,8 +231,7 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			$return['capture_mode'] = $hlpr->__('Capture Mode') . ' : ' . $response['capture_mode'];
 		}
 		
-		if (isset($response['capture_day'])  && $response['capture_day'] > 0)
-		{
+		if (isset($response['capture_day'])  && $response['capture_day'] > 0) {
 		    $return['capture_day'] = $hlpr->__('Day before the capture') . ' : ' . $response['capture_day'];
 		} else {
 			$return['capture_day'] = $hlpr->__('Day before capture: immediate capture') ;	
@@ -231,29 +243,39 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
         	$return['card_number_raw'] = $cc;
 		}
 		
-		if (isset($response['cvv_response_code'])) 
+		if (isset($response['cvv_response_code'])
+			&& $cvvResponseLabel = self::getCvvResponseLabel($response)) 
 		{
-			$return['cvv_response_code'] = $hlpr->__('About CVV credit card') . ' : ' . self::getCvvResponseLabel($response);
-			$return['cvv_response_code_raw'] = self::getCvvResponseLabel($response);
+			$return['cvv_response_code'] = $hlpr->__('About CVV credit card') . ' : ' . $cvvResponseLabel;
+			$return['cvv_response_code_raw'] = $cvvResponseLabel;
 		}
 		
-		if (isset($response['response_code'])) 
+		if (isset($response['response_code'])
+			&& $responseLabel = self::getResponseLabel($response)) 
 		{	
-		    $return['response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getResponseLabel($response);
-			$return['response_code_raw'] = self::getResponseLabel($response); 
+		    $return['response_code'] = $hlpr->__('Response code of the bank') . ' : ' . $responseLabel;
+			$return['response_code_raw'] = $responseLabel; 
 		}
 		
-	    if (isset($response['bank_response_code'])) 
+	    if (isset($response['bank_response_code'])
+	    	&& $bankResponseLabel = self::getBankResponseLabel($response)) 
 	    {
-			$return['bank_response_code'] = $hlpr->__('Response code of the bank') . ' : ' . self::getBankResponseLabel($response);
-			$return['bank_response_code_raw'] = self::getBankResponseLabel($response);
+			$return['bank_response_code'] = $hlpr->__('Response code of the bank') . ' : ' . $bankResponseLabel;
+			$return['bank_response_code_raw'] = $bankResponseLabel;
 		}
 
 		if (isset($response['complementary_code']) 
-			&& ($complementary_code = self::getComplementaryCode($response))) 
+			&& $complementaryCode = self::getComplementaryCode($response)) 
 		{
-			$return['complementary_code'] = $hlpr->__('Additional control') . ' : ' . $complementary_code;
-			$return['complementary_code_raw'] = $complementary_code;
+			$return['complementary_code'] = $hlpr->__('Additional control') . ' : ' . $complementaryCode;
+			$return['complementary_code_raw'] = $complementaryCode;
+		}
+		
+		if (isset($response['transaction_condition']) 
+			&& $transactionConditionLabel = self::getTransactionConditionLabel($response)) 
+		{
+			$return['transaction_condition'] = $hlpr->__('Transaction condition') . ' : ' . $transactionConditionLabel;
+			$return['transaction_condition_raw'] = $transactionConditionLabel;
 		}
 		
 		if (isset($response['data']))
@@ -487,6 +509,36 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			default:
 				if (isset($complementaryCode)) {
 					return $complementaryCode;
+				}
+				break;
+	    }
+	}
+	
+	/**
+     * @return string
+     */
+	public function getTransactionConditionLabel($response)
+	{
+		$transactionCondition = $response['transaction_condition'];
+		
+		$hlpr = Mage::helper('atos');
+		switch ($transactionCondition) 
+		{
+			case '3D_SUCCESS':
+				return $hlpr->__(self::TRANSACTION_CONDITION_3D_SUCCESS);
+			case '3D_FAILURE':
+				return $hlpr->__(self::TRANSACTION_CONDITION_3D_FAILURE);
+			case '3D_ERROR':
+				return $hlpr->__(self::TRANSACTION_CONDITION_3D_ERROR);
+			case '3D_NOTENROLLED':
+				return $hlpr->__(self::TRANSACTION_CONDITION_3D_NOTENROLLED);
+			case '3D_ATTEMPT':
+				return $hlpr->__(self::TRANSACTION_CONDITION_3D_ATTEMPT);
+			case 'SSL':
+				return $hlpr->__(self::TRANSACTION_CONDITION_SSL);
+			default:
+				if (isset($transactionCondition)) {
+					return $transactionCondition;
 				}
 				break;
 	    }
