@@ -288,10 +288,6 @@
 						<code>VISA</code>
 						<name><![CDATA[Visa]]></name>
 					</VISA>
-					<AURORE>
-						<code>AURORE</code>
-						<name><![CDATA[Aurore]]></name>
-					</AURORE>
 					<AMEX>
 						<code>AMEX</code>
 						<name><![CDATA[American Express]]></name>
@@ -304,6 +300,22 @@
 						<code>JCB</code>
 						<name><![CDATA[Japanese Credit Bureau]]></name>
 					</JCB>
+					<DELTA>
+						<code>DELTA</code>
+						<name><![CDATA[Delta]]></name>
+					</DELTA>
+					<SWITCH>
+						<code>SWITCH</code>
+						<name><![CDATA[Switch]]></name>
+					</SWITCH>
+					<SOLO>
+						<code>SOLO</code>
+						<name><![CDATA[Solo]]></name>
+					</SOLO>
+					<AURORE>
+						<code>AURORE</code>
+						<name><![CDATA[Aurore]]></name>
+					</AURORE>
 					<COFINOGA>
 						<code>COFINOGA</code>
 						<name><![CDATA[Cofinoga]]></name>
