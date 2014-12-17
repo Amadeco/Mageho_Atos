@@ -18,7 +18,8 @@
  */
  
  	$hash = unserialize($this->getInfo()->getAdditionalData());
- 	$response = Mage::getSingleton('atos/config')->getApiResponse()->decodeResponse($hash);
+ 	$apiResponse = Mage::getSingleton('atos/config')->getApiResponse();
+ 	$paymentN = $apiResponse->paymentN($hash);
  	$hlpr = Mage::helper('atos'); 
 ?>
 
@@ -50,8 +51,7 @@
  *
  */
 ?>
-<?php if (isset($response['transaction_id'], $response['response_code'])): ?>
-<?php $return = Mage::getSingleton('atos/api_response')->paymentN($hash); ?>
+<?php if (isset($hash['transaction_id'], $hash['response_code'])): ?>
 <div class="grid">
 	<table class="atowpseveral">
 		<thead>
@@ -63,17 +63,17 @@
 	    </thead>
 		<tbody>
 	    	<tr>
-	        	<td class="payment-means first"><img src="<?php echo $this->getCreditCardImgSrc(strtolower($hash['payment_means'])); ?>" alt="<?php echo $hash['payment_means']; ?>" /></td>
+	        	<td class="payment-means first"><img src="<?php echo $this->getCreditCardImgSrc(strtolower($hash['payment_means'])); ?>" alt="<?php echo $hash['payment_means']; ?>" title="<?php echo $hash['payment_means']; ?>" /></td>
 	            <td class="payment-infos">
 	                <ul>
-	                    <li><?php echo $hlpr->__('Number of monthly') . ' : ' . $return['payment_n']; ?></li>
-	                    <li><?php echo $hlpr->__('Debit every %d days', $return['period']); ?></li>
-	                    <li><?php echo $hlpr->__('First debit') . ' : ' . Mage::getSingleton('atos/api_response')->formatAmount($return['initial_amount']); ?></li>
+	                    <li><?php echo $hlpr->__('Number of monthly'); ?> <?php echo $paymentN['payment_n']; ?></li>
+	                    <li><?php echo $hlpr->__('Debit every %d days', $paymentN['period']); ?></li>
+	                    <li><?php echo $hlpr->__('First debit'); ?> <?php echo $apiResponse->formatAmount($paymentN['initial_amount']); ?></li>
 	                </ul>
 	            </td>
 	            <td class="payment-due-dates last">
 	            	<ol>
-						<?php foreach ($return['payment_due_dates'] as $date): ?>
+						<?php foreach ($paymentN['payment_due_dates'] as $date): ?>
 	                    <li><?php echo $date; ?></li>
 	                    <?php endforeach; ?>
 	                </ol>
@@ -83,20 +83,78 @@
 	</table>
 </div>
 
-<div class="more"><a href="#response" onclick="Effect.toggle('response', 'blind'); return false;"><?php echo $hlpr->__('More Informations'); ?></a></div>
+<div class="more"><a href="#response" onclick="Effect.toggle('response', 'blind'); return false;" onkeypress="Effect.toggle('response', 'blind'); return false;"><?php echo $hlpr->__('More Informations'); ?></a></div>
 <div id="response" style="display:none">
-	<table class="form-list">
-		<tbody>
-			<?php foreach ($response as $key => $value): ?>
-				<?php if (strpos($key, '_raw')): continue; endif; ?>
-				<?php if (isset($response[$key])): ?>
+	<div class="grid">
+		<table class="border">
+			<tbody>
 				<tr>
-					<td><?php echo $response[$key]; ?></td>
+					<th><?php echo $hlpr->__('Transaction Number'); ?></th>
+					<td><?php echo $hash['transaction_id']; ?></td>
+				</tr>
+				
+				<?php if (isset($hash['capture_mode']) && !empty($hash['capture_mode'])): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Capture Mode'); ?></th>
+					<td><?php echo $hash['capture_mode']; ?></td>
 				</tr>
 				<?php endif; ?>
-			<?php endforeach; ?>
-		</tbody>
-	</table>
+				
+				<tr>
+					<th><?php echo $hlpr->__('Day before the capture'); ?></th>
+					<td>
+						<?php if (isset($hash['capture_day'])  && $hash['capture_day'] > 0): ?>
+						<?php echo $hash['capture_day']; ?>
+						<?php else: ?>
+						<?php echo $hlpr->__('Day before capture: immediate capture'); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+						
+				<?php if ($cc = $apiResponse->getCcNumberEnc($hash['card_number'])): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Credit card number'); ?></th>
+					<td><?php echo $cc; ?></td>
+				</tr>
+				<?php endif; ?>
+					
+				<?php if (isset($hash['cvv_response_code']) && $cvvResponseLabel = $apiResponse->getCvvResponseLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('About CVV credit card'); ?></th>
+					<td><?php echo $cvvResponseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['response_code']) && $responseLabel = $apiResponse->getResponseLabel($hash)): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Response code'); ?></th>
+					<td><?php echo $responseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['bank_response_code']) && $bankResponseLabel = $apiResponse->getBankResponseLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('Response code of the bank'); ?></th>
+					<td><?php echo $bankResponseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['complementary_code']) && $complementaryCode = $apiResponse->getComplementaryCode($hash)): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Additional control'); ?></th>
+					<td><?php echo $complementaryCode; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['transaction_condition']) && $transactionConditionLabel = $apiResponse->getTransactionConditionLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('Transaction condition'); ?></th>
+					<td><?php echo $transactionConditionLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+			</tbody>
+		</table>
+	</div>
 </div>
 <?php endif; ?>
 

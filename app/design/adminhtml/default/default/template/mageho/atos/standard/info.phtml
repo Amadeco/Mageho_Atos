@@ -18,11 +18,11 @@
  */
  
  	$hash = unserialize($this->getInfo()->getAdditionalData());
- 	$response = Mage::getSingleton('atos/config')->getApiResponse()->decodeResponse($hash);
+ 	$apiResponse = Mage::getSingleton('atos/config')->getApiResponse();
  	$hlpr = Mage::helper('atos'); 
 ?>
-<div id="atos-logo">&nbsp;</div>
 
+<div id="atos-logo">&nbsp;</div>
 <p><strong><?php echo $this->getMethod()->getTitle(); ?></strong></p>
 
 <ul class="messages">
@@ -50,34 +50,86 @@
  *
  */
 ?>
-<?php if (isset($response['transaction_id'], $response['response_code'])): ?>
+<?php if (isset($hash['transaction_id'], $hash['response_code'])): ?>
 
 <div class="more">
-	<a href="#response" onclick="Effect.toggle('response', 'blind'); return false;">
-		<?php echo Mage::helper('atos')->__('More Informations'); ?>
+	<a href="#response" onclick="Effect.toggle('response', 'blind'); return false;" onkeypress="Effect.toggle('response', 'blind'); return false;">
+		<?php echo $hlpr->__('More Informations'); ?>
 	</a>
 </div>
 
 <div id="response" style="display:none">
-	<table class="atowps">
-		<tbody>
-        	<tr>
-            	<td class="payment-means first"><img src="<?php echo $this->getCreditCardImgSrc(strtolower($hash['payment_means'])); ?>" alt="<?php echo $hash['payment_means']; ?>" /></td>
-                <td class="payment-infos last">
-					<ul>
-						<?php foreach ($response as $key => $value): ?>
-							<?php if (strpos($key, '_raw')): continue; endif; ?>
-							<?php if (isset($response[$key])): ?>
-							<li><?php echo $response[$key]; ?>
-							<?php endif; ?>
-						<?php endforeach; ?>
-                	</ul>
-                </td>
-        	</tr>
-		</tbody>
-	</table>
+	<div class="grid">
+		<table class="border">
+			<tbody>
+				<tr>
+					<th><?php echo $hlpr->__('Transaction Number'); ?></th>
+					<td><?php echo $hash['transaction_id']; ?></td>
+				</tr>
+				
+				<?php if (isset($hash['capture_mode']) && !empty($hash['capture_mode'])): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Capture Mode'); ?></th>
+					<td><?php echo $hash['capture_mode']; ?></td>
+				</tr>
+				<?php endif; ?>
+				
+				<tr>
+					<th><?php echo $hlpr->__('Day before the capture'); ?></th>
+					<td>
+						<?php if (isset($hash['capture_day'])  && $hash['capture_day'] > 0): ?>
+						<?php echo $hash['capture_day']; ?>
+						<?php else: ?>
+						<?php echo $hlpr->__('Day before capture: immediate capture'); ?>
+						<?php endif; ?>
+					</td>
+				</tr>
+						
+				<?php if ($cc = $apiResponse->getCcNumberEnc($hash['card_number'])): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Credit card number'); ?></th>
+					<td><?php echo $cc; ?></td>
+				</tr>
+				<?php endif; ?>
+					
+				<?php if (isset($hash['cvv_response_code']) && $cvvResponseLabel = $apiResponse->getCvvResponseLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('About CVV credit card'); ?></th>
+					<td><?php echo $cvvResponseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['response_code']) && $responseLabel = $apiResponse->getResponseLabel($hash)): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Response code'); ?></th>
+					<td><?php echo $responseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['bank_response_code']) && $bankResponseLabel = $apiResponse->getBankResponseLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('Response code of the bank'); ?></th>
+					<td><?php echo $bankResponseLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['complementary_code']) && $complementaryCode = $apiResponse->getComplementaryCode($hash)): ?>
+				<tr class="even">
+					<th><?php echo $hlpr->__('Additional control'); ?></th>
+					<td><?php echo $complementaryCode; ?></td>
+				</tr>
+				<?php endif; ?>
+							
+				<?php if (isset($hash['transaction_condition']) && $transactionConditionLabel = $apiResponse->getTransactionConditionLabel($hash)): ?>
+				<tr>
+					<th><?php echo $hlpr->__('Transaction condition'); ?></th>
+					<td><?php echo $transactionConditionLabel; ?></td>
+				</tr>
+				<?php endif; ?>
+			</tbody>
+		</table>
+	</div>
 </div>
-
 <?php endif; ?>
 
 <div class="divider">&nbsp;</div>
