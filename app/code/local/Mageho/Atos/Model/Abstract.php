@@ -168,9 +168,8 @@ class Mageho_Atos_Model_Abstract extends Mage_Payment_Model_Method_Abstract
 	         * XAF & XOF Code ISO devise France CFA (BEAC) & CFA (BCEAO) / 952
 	         *
 	         */
-            
-            if ($orderCurrencyCode = $_order->getOrderCurrencyCode() 
-            	&& in_array($orderCurrencyCode, array('JPY', 'KPW', 'KRW', 'XPF', 'XAF', 'XOF'))) 
+            $orderCurrencyCode = $_order->getOrderCurrencyCode();
+            if (in_array($orderCurrencyCode, array('JPY', 'KPW', 'KRW', 'XPF', 'XAF', 'XOF'))) 
             {
 	            $decimals = 0;
             } else {
