@@ -158,12 +158,29 @@ class Mageho_Atos_Model_Abstract extends Mage_Payment_Model_Method_Abstract
      */
     protected function _getAmount() 
     {
-        if ($this->_getOrder()) {
-            $total = $this->_getOrder()->getTotalDue();
+        if ($_order = $this->_getOrder()) 
+        {
+            /*
+	         *
+	         * JPY Code ISO devise Yen / 392
+	         * KPW Code ISO devise Won / 410
+	         * XPF Code ISO devise Franc Polynesien / 953
+	         * XAF Code ISO devise France CFA / 952
+	         *
+	         */
+            
+            if ($orderCurrencyCode = $_order->getOrderCurrencyCode() 
+            	&& in_array($orderCurrencyCode, array('JPY', 'KPW', 'XPF', 'XAF'))) 
+            {
+	            $decimals = 0;
+            } else {
+	            $decimals = 2;
+            }
+            $total = number_format($_order->getTotalDue(), $decimals, '', '');
         } else {
             $total = 0;
 		}
-        return number_format($total, 2, '', '');
+		return $total;
     }
     
     /**
