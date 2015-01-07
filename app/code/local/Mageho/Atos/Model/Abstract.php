@@ -162,15 +162,15 @@ class Mageho_Atos_Model_Abstract extends Mage_Payment_Model_Method_Abstract
         {
             /*
 	         *
-	         * JPY Code ISO devise Yen / 392
-	         * KPW Code ISO devise Won / 410
-	         * XPF Code ISO devise Franc Polynesien / 953
-	         * XAF Code ISO devise France CFA / 952
+	         * JPY Code ISO devise Yen japonais / 392
+	         * KPW & KRW Code ISO devise Won (nord-coréen) & (sud-coréen) / 410
+	         * XPF Code ISO devise franc CFP / 953
+	         * XAF & XOF Code ISO devise France CFA (BEAC) & CFA (BCEAO) / 952
 	         *
 	         */
             
             if ($orderCurrencyCode = $_order->getOrderCurrencyCode() 
-            	&& in_array($orderCurrencyCode, array('JPY', 'KPW', 'XPF', 'XAF'))) 
+            	&& in_array($orderCurrencyCode, array('JPY', 'KPW', 'KRW', 'XPF', 'XAF', 'XOF'))) 
             {
 	            $decimals = 0;
             } else {
