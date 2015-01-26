@@ -34,6 +34,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Abstract
      */
     protected $_canUseInternal = false;
     protected $_canUseCheckout = true;
+    protected $_isInitializeNeeded = true;
     protected $_canUseForMultishipping = false;
 	
 	/**
@@ -159,6 +160,15 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Abstract
 		if ($data->getAtosStandardPaymentMeans()) {
 	        $this->getAtosSession()->setAtosStandardPaymentMeans($data->getAtosStandardPaymentMeans());
 		}
+		
+		if ($data->getAuroreDob()) {
+			$dob = Mage::app()->getLocale()->date($data->getAuroreDob(), null, null, false)->toString('yyyy-MM-dd');
+			$this->getAtosSession()->setCustomerDob($dob);
+			// $this->getQuote()->setCustomerDob($dob);
+			
+			Mage::log($dob);
+		}
+		
         return $this;
     }
 	

@@ -202,7 +202,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 	
     /**
-     * RÃ©cupÃ¨re un tableau des devises autorisÃ©es
+     * Récupère un tableau des devises autorisées
      *
      * @return array $currencies
      */
@@ -232,7 +232,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /**
-     * RÃ©cupÃ¨re un tableau des langages autorisÃ©es
+     * Récupère un tableau des langages autorisées
      *
      * @return array $languages
      */
@@ -270,7 +270,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /**
-     * RÃ©cupÃ¨re un tableau des modes de paiement autorisÃ©s
+     * Récupère un tableau des modes de paiement autorisés
      *
      * @return array $paymentMeans
      */
@@ -282,9 +282,20 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
         return $paymentMeans;
     }
+    
+     /**
+	  * Get customer date of birth
+	  *
+	  * @return string
+	  */
+	protected function _getCustomerDob() 
+	{
+		$date = explode(' ', Mage::getSingleton('atos/session')->getCustomerDob());
+		return preg_replace('/-/', '', $date[0]);
+	}
 	
     /**
-     * RÃ©cupÃ¨re un tableau des mots clÃ©s du champ data 
+     * Récupère un tableau des mots clés du champ data 
      *
      * @return array $datafields
      */
@@ -304,24 +315,32 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	 *
 	 *
 	 */
-	public function getDatafield($datafieldToAdd = null)
+	public function getDatafield($addDatafields = null)
 	{
 		$datafield = Mage::getStoreConfig($this->_getSpecificConfigPath('datafield'), $this->_storeId);
 		
-		if (isset($datafieldToAdd) && !empty($datafieldToAdd)) 
+		if (isset($addDatafields) && !empty($addDatafields)) 
 		{
-			foreach ($datafieldToAdd as $key => $value) {
+			foreach ($addDatafields as $key => $value) {
 				$datafield.= ',' . $key . '=' . $value;
 			}
 		}
 		
-		/* DonnÃ©e spÃ©cifique PayPal: Le numÃ©ro de commande PayPal */
-		if ($paymentMeans = $this->getAtosSession()->getAtosStandardPaymentMeans()
-		 && isset($paymentMeans) && $paymentMeans == 'PAYPAL') 
+		/* Donnée spécifique Aurore: Date de naissance */
+		if ($this->getAtosSession()->getAtosStandardPaymentMeans() == 'AURORE') 
+		{
+			if ($dob = $this->_getCustomerDob()) {
+				$datafield.= ',DATE_NAISSANCE=' . $dob;
+			}
+			$datafield.= ',MODE_REGLEMENT=MR_CREDIT';
+		}
+		
+		/* Donnée spécifique PayPal: Le numéro de commande PayPal */
+		if ($this->getAtosSession()->getAtosStandardPaymentMeans() == 'PAYPAL') 
 		{
 			if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) 
 			{
-				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractÃ¨res et contenir des caractÃ¨res alpha-numÃ©riques */
+				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
 				$datafield.= ',PP_INVOICEID=' . $orderId;
 			}
 		}

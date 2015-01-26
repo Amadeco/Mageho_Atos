@@ -20,16 +20,6 @@
 class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 {
     protected $_atosPaymentResponse;
-    
-   /*
-	* Get Atos/Sips Standard config
-	*
-	* @return Quadra_Atos_Model_Config
-	*/
-	public function getConfig()
-	{
-	    return Mage::getSingleton('atos/config');
-	}
 	
 	/*
 	 * Get checkout session
@@ -60,6 +50,16 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
     {
         return Mage::getSingleton('customer/session');
     }
+    
+   /*
+	* Get Atos/Sips Standard config
+	*
+	* @return Quadra_Atos_Model_Config
+	*/
+	public function getConfig()
+	{
+	    return Mage::getSingleton('atos/config');
+	}
 	
 	/*
      * Get singleton Atos session
@@ -203,6 +203,8 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 				if ($payment->getConfig()->invoice_create) {
                     Mage::helper('atos')->saveInvoice($order);
 				}
+				
+				$order->save();
 
                 if (!$order->getEmailSent()) {
                 	$order->sendNewOrderEmail();
@@ -229,10 +231,11 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
                 if ($state == Mage_Sales_Model_Order::STATE_HOLDED && $order->canHold()) {
                 	$order->hold();
                 }
+                
+				$order->save();
+                
                 break;
         }
-        
-        $order->save();
     }
 	
 	public function saveTransaction(Varien_Object $payment)

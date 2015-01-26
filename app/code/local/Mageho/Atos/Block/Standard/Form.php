@@ -31,7 +31,9 @@ class Mageho_Atos_Block_Standard_Form extends Mage_Payment_Block_Form
      * @var Mage_Paypal_Model_Config
      */
     protected $_config;
-    
+    protected $_customer;
+    protected $_checkout;
+    protected $_quote;
 	protected $_paymentMeans = array();
 	
     protected function _construct()
@@ -51,6 +53,71 @@ class Mageho_Atos_Block_Standard_Form extends Mage_Payment_Block_Form
         	->setMethodLabelAfterHtml($mark->toHtml());
         	
         return parent::_construct();
+    }
+	
+	/*
+     * Get singleton Atos session
+     *
+     * @return object Mageho_Atos_Model_Session
+     */
+	public function getAtosSession()
+	{
+	    return Mage::getSingleton('atos/session');	
+	}
+
+    /**
+     * Get logged in customer
+     *
+     * @return Mage_Customer_Model_Customer
+     */
+    public function getCustomer() 
+    {
+        if (empty($this->_customer)) {
+            $this->_customer = Mage::getSingleton('customer/session')->getCustomer();
+        }
+        return $this->_customer;
+    }
+
+    /**
+     * Retrieve checkout session model
+     *
+     * @return Mage_Checkout_Model_Session
+     */
+    public function getCheckout() 
+    {
+        if (empty($this->_checkout)) {
+            $this->_checkout = Mage::getSingleton('checkout/session');
+        }
+        return $this->_checkout;
+    }
+
+    /**
+     * Retrieve sales quote model
+     *
+     * @return Mage_Sales_Model_Quote
+     */
+    public function getQuote() 
+    {
+        if (empty($this->_quote)) {
+            $this->_quote = $this->getCheckout()->getQuote();
+        }
+        return $this->_quote;
+    }
+
+    /**
+     * Get Customer Date of Birth
+     *
+     * @return string
+     */
+    public function getCustomerDob() 
+    {
+	    if ($this->getAtosSession()->getCustomerDob()) {
+			return $this->getAtosSession()->getCustomerDob();
+	    } elseif ($this->getQuote()->getCustomerDob()) {
+		    return $this->getQuote()->getCustomerDob();
+		} else {
+			return $this->getCustomer()->getDob();
+		}
     }
 
 	public function getPaymentMeans()
@@ -78,7 +145,7 @@ class Mageho_Atos_Block_Standard_Form extends Mage_Payment_Block_Form
 	
 	public function getSelectedMethod()
 	{		
-	    return $this->getMethod()->getAtosSession()->getAtosStandardPaymentMeans();
+	    return $this->getAtosSession()->getAtosStandardPaymentMeans();
 	}
 	
 	public function getCmsBlock()

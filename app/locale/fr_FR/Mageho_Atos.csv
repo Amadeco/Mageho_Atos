@@ -187,6 +187,7 @@
 "The trader involved in the 3-D Secure program but the wearer's card is not enrolled","Le commerçant participe au programme 3-D Secure mais la carte du porteur n’est pas enrôlée"
 "This button will allow you to create on the fly pathfile files & Parcom. Warning: remember to check the ownership and permissions on new files generated.","Ce bouton va vous permettre de créer à la volée les fichiers pathfile & parcom. Attention : pensez à vérifier les droits et les permissions sur les nouveaux fichiers générés."
 "Title","Titre"
+"To pay with Aurore, we need your birth date. Please, check it.","Pour payer avec votre carte Aurore, la plateforme de paiement sécurisé à besoin de votre date de naissance. Renseignez-là dans le champs ci-dessous."
 "Transaction already registered","Transaction déjà enregistrée"
 "Transaction approved or successfully treated","Transaction approuvée ou traitée avec succès"
 "Transaction condition","Condition de transaction"

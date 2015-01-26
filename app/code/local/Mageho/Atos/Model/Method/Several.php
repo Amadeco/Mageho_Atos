@@ -34,6 +34,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Abstract
      */
     protected $_canUseInternal = false;
     protected $_canUseCheckout = true;
+    protected $_isInitializeNeeded = true;
     protected $_canUseForMultishipping = false;
 	
 	/**

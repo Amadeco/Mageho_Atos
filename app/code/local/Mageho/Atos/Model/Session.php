@@ -19,8 +19,31 @@
 
 class Mageho_Atos_Model_Session extends Mage_Core_Model_Session_Abstract
 {
+    protected $_quoteId;
+    
     public function __construct()
     {
         $this->init('atos');
+    }
+
+    /**
+     * Unset all data associated with object
+     */
+    public function unsetAll() 
+    {
+        parent::unsetAll();
+        $this->_quoteId = null;
+    }
+    
+    protected function _getQuoteIdKey() {
+        return 'quote_id_' . Mage::app()->getStore()->getWebsiteId();
+    }
+
+    public function setQuoteId($quoteId) {
+        $this->setData($this->_getQuoteIdKey(), $quoteId);
+    }
+
+    public function getQuoteId() {
+        return $this->getData($this->_getQuoteIdKey());
     }
 }
