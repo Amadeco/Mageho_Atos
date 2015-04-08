@@ -52,7 +52,7 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
 						$status = $order->getStatus();
 					}
 					
-                    $order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
+                    $order->addStatusToHistory($status, Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
                           ->save();
                 }
 		    
