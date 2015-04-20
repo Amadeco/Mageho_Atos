@@ -52,19 +52,28 @@
 	    <script>
 		/* <![CDATA[ */
 	        var atosAuroreMethod = $('<?php echo $_code ?>_atos_cc_aurore');
-	        if (atosAuroreMethod.checked === false) {
-	        	$('atos_aurore_dob').hide();
-	        }
-	        
-	        $$('.atos_cc').each(function(element) {
-		        element.observe('change', function() {
-			        if (this.id == atosAuroreMethod.id) {
-			    		$('atos_aurore_dob').toggle();
-				    } else {
-					    $('atos_aurore_dob').hide();
-					}
-		        });
-		    });
+	        if (atosAuroreMethod) 
+	        {
+		        if (atosAuroreMethod.checked === false) 
+		        {
+		        	$('atos_aurore_dob').hide();
+		        }
+		        
+		        $$('.atos_cc').each(function(element) 
+		        {
+			        element.observe('change', function() 
+			        {
+				        if (this.id == atosAuroreMethod.id) 
+				        {
+				    		$('atos_aurore_dob').toggle();
+					    } else {
+						    $('atos_aurore_dob').hide();
+						}
+			        });
+			    });
+		    } else {
+			    $('atos_aurore_dob').hide();
+		    }
 		/* ]]> */
 	   </script>
     </div>
