@@ -33,8 +33,10 @@
 				</label>
             </li>
             <?php endforeach; ?>
-        </ol>        
+        </ol>
         <div class="clearfix"></div>
+        
+        <?php if (in_array($_paymentMeans, 'AURORE')): ?>
         <div id="atos_aurore_dob">
 	        <hr role="presentation" />
 	        
@@ -76,6 +78,8 @@
 		    }
 		/* ]]> */
 	   </script>
+	   <?php endif; ?>
+	   
     </div>
     <div class="atos-cms-block"><?php echo $this->getCmsBlock(); ?></div>
 </fieldset>
