@@ -26,6 +26,21 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     const METHOD_ATOS_SIPS_PAYMENT_STANDARD = 'atoswps';
 	const METHOD_ATOS_SIPS_PAYMENT_SEVERAL = 'atoswpseveral';
 	
+
+    /**
+     * Atos Sips Standard Mode Action
+     * @var string
+     */
+	const PAYMENT_ACTION_CAPTURE = 'AUTHOR_CAPTURE';
+	
+	/* 
+	 * Ce mode de capture est dangereux
+	 * Si on oublie de valider la transaction sur le BO de la banque, pas de débit, si supérieur à 7 jours, le débit n'est plus autorisé, la banque fait une nouvelle demande d'autorisation
+	 * 
+	 * Si activé, ne pas oublier d'enlever le champs depends du fichier system.xml du champs "capture_day" 
+	 */
+    const PAYMENT_ACTION_AUTHORIZE = 'VALIDATION';
+	
 	/**
      * Current payment method code
      * @var string
@@ -154,6 +169,35 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         $this->$key = $value;
         $this->$underscored = $value;
         return $value;
+    }
+    
+    /**
+     * Mapper from Atos/Sips Standard payment actions to Magento payment actions
+     *
+     * @return string|null
+     */
+    public function getPaymentAction($action)
+    {
+        switch ($action) {
+            case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE:
+                return self::PAYMENT_ACTION_AUTHORIZE;
+            case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE :
+                return self::PAYMENT_ACTION_CAPTURE;
+        }
+    }
+    
+    /**
+     * Payment actions source getter
+     *
+     * @return array
+     */
+    public function getPaymentActions()
+    {
+        $paymentActions = array(
+            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE => Mage::helper('adminhtml')->__('Author Capture'),
+            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE => Mage::helper('adminhtml')->__('Validation')
+        );
+        return $paymentActions;
     }
 	
 	public function getConfigFile($file, $repertory = 'etc')
@@ -494,13 +538,8 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         {
             case 'title':
 			case 'sort_order':
-            case 'order_status':
-			case 'invoice_create':
 			case 'payment_means':
-			case 'order_status_payment_accepted':
-			case 'order_status_payment_refused':
-			case 'order_status_payment_canceled':
-			case 'capture_mode':
+			case 'payment_action':
 			case 'capture_day':
 			case 'cms_block':
 			case 'icon':
@@ -531,12 +570,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         {
             case 'title':
 			case 'sort_order':
-            case 'order_status':
-			case 'invoice_create':
 			case 'payment_means':
-			case 'order_status_payment_accepted':
-			case 'order_status_payment_refused':
-			case 'order_status_payment_canceled':
 			case 'nb_payment':
 			case 'icon':
 			case 'cms_block':

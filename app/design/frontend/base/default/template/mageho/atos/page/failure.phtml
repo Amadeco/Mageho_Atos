@@ -13,13 +13,18 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
+ 
+	 $title = $this->__('An error occurred in the process of payment');
+	 if ($this->getTitle()) {
+		 $title = $this->getTitle();
+	 }
 ?>
 <div id="atos-failure-wrapper">
 	<div class="page-title">
-	    <h1><?php echo ($this->getTitle()) ? $this->getTitle() : $this->__('An error occurred in the process of payment'); ?></h1>
+	    <h1><?php echo $title; ?></h1>
 	</div>
 	
 	<ul class="note-msg">
@@ -33,6 +38,14 @@
 	<?php echo $this->getChildHtml('atos.failure.extra.blocks'); ?>
 	
 	<div class="buttons-set">
-		<p><?php echo $this->__('Click <a href="%s">here</a> to continue shopping.', $this->helper('checkout/url')->getCartUrl()) ?></p>
+		<p class="f-left left"><?php echo $this->__('Click <a href="%s">here</a> to continue shopping.', $this->helper('checkout/url')->getCartUrl()) ?></p>
+		
+		<?php if ($this->getButtonUrl() && $this->getButtonText()): ?>
+		<p class="f-right right">
+			<a href="<?php echo $this->escapeUrl($this->getButtonUrl()); ?>" role="button" class="btn btn-danger btn-lg">
+				<?php echo $this->escapeHtml($this->getButtonText()); ?>
+			</a>
+		</p>
+		<?php endif; ?>
 	</div>
 </div>

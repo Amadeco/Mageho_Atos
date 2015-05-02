@@ -14,7 +14,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 -->
@@ -137,7 +137,7 @@
                         </datafield>
                         <redirect translate="label comment">
                             <label>Redirect transactions rejected</label>
-                            <comment><![CDATA[No: redirects to the default page list, yes : redirects to the page atos failure.]]></comment>
+                            <comment><![CDATA[No: redirects to the shopping cart, yes : redirects to the page atos failure.]]></comment>
                             <frontend_type>select</frontend_type>
 							<source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>70</sort_order>
@@ -286,24 +286,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </title>
-                        <order_status translate="label">
-                            <label>New order status</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>atos/system_config_source_order_status</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-                        </order_status>
-                        <invoice_create translate="label">
-                            <label>Create invoice when payment accepted</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-                        </invoice_create>
                         <payment_means translate="label">
                             <label>Payment Means</label>
                             <frontend_type>multiselect</frontend_type>
@@ -313,16 +295,7 @@
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
                         </payment_means>
-                        <order_status_payment_accepted translate="label">
-                            <label>Order status when payment accepted by Atos</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>atos/system_config_source_order_status_accepted</source_model>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-		        		</order_status_payment_accepted>
-						<capture_mode translate="label">
+						<payment_action translate="label">
                             <label>Capture Mode</label>
                             <frontend_type>select</frontend_type>
                             <source_model>atos/system_config_source_capturemode</source_model>
@@ -330,7 +303,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-						</capture_mode>
+						</payment_action>
 						<capture_day translate="label comment">
                             <label>Capture Day</label>
 							<comment><![CDATA[Between 0 and 99 - Notice : Be careful, when you exceed 7 days, the transaction account for two]]></comment>
@@ -339,9 +312,6 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-							<depends>
-								<capture_mode>AUTHOR_CAPTURE</capture_mode>
-							</depends>
 						</capture_day>
 						<cms_block translate="label">
 							<label>Display a CMS block inside the payment form</label>
@@ -425,24 +395,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </title>
-                        <order_status translate="label">
-                            <label>New order status</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>atos/system_config_source_order_status</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </order_status>
-                        <invoice_create translate="label">
-                            <label>Create invoice when payment accepted</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-                        </invoice_create>
                         <payment_means translate="label comment">
                             <label>Payment Means</label>
 							<comment><![CDATA[Only available for these credit card : CB, VISA and MASTERCARD]]></comment>
@@ -453,15 +405,6 @@
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
                         </payment_means>
-                        <order_status_payment_accepted translate="label">
-                            <label>Order status when payment accepted by Atos</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>atos/system_config_source_order_status_accepted</source_model>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-		        		</order_status_payment_accepted>
                         <nb_payment translate="label">
                             <label>Number of payment</label>
                             <frontend_type>select</frontend_type>

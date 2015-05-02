@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
@@ -23,5 +23,5 @@
  	$_total = $this->getTotal();
 ?>
 <br />
-<?php echo $this->__('Pay'); ?> <?php echo $_nb; ?> * <?php echo $this->helper('core')->currency($_term); ?><br />
+<b class="text-lg"><?php echo $this->__('Pay'); ?> <?php echo $_nb; ?> * <?php echo $this->helper('core')->currency($_term); ?></b><br />
 <small><?php echo $this->__('For information, your total order is %s', $this->helper('core')->currency($_total, true, false)); ?></small>

@@ -151,6 +151,10 @@ class Mageho_Atos_Block_Standard_Form extends Mage_Payment_Block_Form
 	public function getCmsBlock()
 	{
 		$cmsBlockId = $this->getMethod()->getConfig()->cms_block;
-		return Mage::app()->getLayout()->createBlock('cms/block')->setBlockId($cmsBlockId)->toHtml();
+		
+		return Mage::app()->getLayout()
+			->createBlock('cms/block')
+			->setBlockId($cmsBlockId)
+			->toHtml();
 	}
 }

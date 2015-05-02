@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 ?>
@@ -22,5 +22,7 @@
 	<p><img src="<?php echo $this->getCreditCardImgSrc(); ?>" alt="<?php echo $this->getSelectedMethod(); ?>" title="<?php echo $this->getSelectedMethod(); ?>" /></p>
 	<?php endif; ?>
 	
-	<p><?php echo $this->getMethod()->getTitle(); ?></p>
+	<br />
+	
+	<p><?php echo $this->getMethod()->getTitle(); ?> (<?php echo $this->getSelectedMethod(); ?>)</p>
 </div>

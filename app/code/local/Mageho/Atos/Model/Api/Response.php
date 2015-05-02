@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
@@ -224,6 +224,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 		$bankResponseCode = $response['bank_response_code'];
 		$paymentMeans = $response['payment_means'];
 		
+		Mage::log($responseCode);
+		
 		$hlpr = Mage::helper('atos');
 		
 		if ($paymentMeans == 'PAYPAL')
@@ -275,10 +277,9 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			case '94':
 				return $hlpr->__(self::RESPONSE_TRANSACTION_ALREADY_REGISTERED);
 				break;
-		}
-		
-		if (isset($responseCode)) {
-			return $responseCode;
+			default:
+				return $responseCode;
+				break;
 		}
 	}
 
@@ -308,9 +309,11 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			case '30':	return $hlpr->__(self::BANK_RESPONSE_FORMAT_ERROR);
 			case '31':	return $hlpr->__(self::BANK_RESPONSE_UNKNOWN_BUYER_ORGANIZATION);
 			case '33':	return $hlpr->__(self::BANK_RESPONSE_EXPIRY_DATE_EXCEEDED);
+			
 			case '59':
 			case '34':
 				return $hlpr->__(self::BANK_RESPONSE_SUSPECTED_FRAUD);
+				
 			case '41':	return $hlpr->__(self::BANK_RESPONSE_CREDIT_CARD_LOST);
 			case '43':	return $hlpr->__(self::BANK_RESPONSE_CREDIT_CARD_STOLEN);
 			case '51':	return $hlpr->__(self::BANK_RESPONSE_INSUFFICIENT_FUNDS_OR_CREDIT_EXCEEDED);

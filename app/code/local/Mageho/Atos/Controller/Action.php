@@ -13,13 +13,18 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
 class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 {
-    protected $_atosPaymentResponse;
+    protected $_api = null;
+    protected $_config = null;
+    protected $_invoice = null;
+    protected $_invoiceFlag = false;
+    protected $_order = null;
+    protected $_atosResponse = null;
 	
 	/*
 	 * Get checkout session
@@ -105,50 +110,111 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
      * @param array $request
      * @return object Mageho_Atos_Controller_Action $this
      */
-    public function setAtosResponse($request)
+    public function processIpnResponse($request)
     {
     	if (! isset($request['DATA'])) {
-	    	Mage::getSingleton('atos/debug')->log($this->__('An error occured: var $request has no data.'));
-            $this->getAtosSession()->setRedirectMessage($this->__('An error occured: no data received.'));
-            $this->_redirect('*/*/failure', array('_secure' => true));
-            return;
+	    	Mage::getSingleton('atos/debug')->log(
+	    		Mage::helper('atos')->__('An error occured: var $request has no data.')
+	    	);
+            
+            $this->getAtosSession()->setRedirectMessage(
+            	Mage::helper('atos')->__('An error occured: no data received.')
+            );
+                
+            Mage::app()->getResponse()
+            	->setHeader('HTTP/1.1', '503 Service Unavailable')
+            	->sendResponse();
+            exit;
         }
         
-        $response = $this->getApiResponse()->doResponse($request['DATA']);
+        $this->_atosResponse = $this->getApiResponse()->doResponse($request['DATA']);
     
-		if ($response['merchant_id'] != $this->getConfig()->merchant_id) {
-			Mage::getSingleton('atos/debug')->log($this->__("Configuration merchant id (%s) doesn't match merchant id (%s)", $this->getConfig()->merchant_id, $response['merchant_id']));
-			$this->getAtosSession()->setRedirectMessage($this->__('We encounter errors with this payment method'));
-	    	$this->_redirect('*/*/failure', array('_secure' => true));
-            return;
+		if ($this->_atosResponse['merchant_id'] != $this->getConfig()->merchant_id) {
+			Mage::getSingleton('atos/debug')->log(
+				Mage::helper('atos')->__("Configuration merchant id (%s) doesn't match merchant id (%s)", 
+					$this->getConfig()->merchant_id, 
+					$this->_atosResponse['merchant_id']
+				)
+			);
+			
+			$this->getAtosSession()->setRedirectMessage(
+				Mage::helper('atos')->__('We encounter errors with this payment method')
+			);
+                
+            Mage::app()->getResponse()
+            	->setHeader('HTTP/1.1', '503 Service Unavailable')
+            	->sendResponse();
+            exit;
 		}
 	
-	    if ($response['code'] == '-1') {
-	    	Mage::getSingleton('atos/debug')->log($this->__("An error occured: error code %s", $this->getAtosResponse('code')));
-			$this->getAtosSession()->setRedirectMessage($this->__('We encounter errors with this payment method'));
-	    	$this->_redirect('*/*/failure', array('_secure' => true));
-	        return;
+	    if ($this->_atosResponse['code'] == '-1') {
+	    	Mage::getSingleton('atos/debug')->log(
+	    		Mage::helper('atos')->__("An error occured: error code %s", $this->_atosResponse['code'])
+	    	);
+			
+			$this->getAtosSession()->setRedirectMessage(
+				Mage::helper('atos')->__('We encounter errors with this payment method')
+			);
+                
+            Mage::app()->getResponse()
+            	->setHeader('HTTP/1.1', '503 Service Unavailable')
+            	->sendResponse();
+            exit;
 	    }
-		
-		$this->_atosPaymentResponse = $response;
 
 		return $this;
     }
-	
-	public function hasAtosResponse() 
-	{
-		return (bool) !empty($this->_atosPaymentResponse) && count($this->_atosPaymentResponse);	
-	}
 
 	public function getAtosResponse($key = null) 
 	{
 		if ($key != null) {
-			if (isset($this->_atosPaymentResponse[$key])) {
-				return $this->_atosPaymentResponse[$key];
+			if (isset($this->_atosResponse[$key])) {
+				return $this->_atosResponse[$key];
 			}
 		}
-		return $this->_atosPaymentResponse;
+		return $this->_atosResponse;
 	}
+	
+	public function hasAtosResponse() 
+	{
+		return (bool) !empty($this->_atosResponse) && count($this->_atosResponse);	
+	}
+	
+    /**
+     * Load order
+     *
+     * @return Mage_Sales_Model_Order
+     */
+    protected function _getOrder()
+    {
+        if (empty($this->_order)) {
+            // Check order ID existence
+            if (!array_key_exists('order_id', $this->_atosResponse)) {
+                Mage::getSingleton('atos/debug')->log(
+                	Mage::helper('atos')->__('No order Id found in response data.')
+                );
+                
+                Mage::app()->getResponse()
+                        ->setHeader('HTTP/1.1', '503 Service Unavailable')
+                        ->sendResponse();
+                exit;
+            }
+            // Load order
+            $orderId = $this->_atosResponse['order_id'];
+            $this->_order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+            if (!$this->_order->getId()) {
+                Mage::getSingleton('atos/debug')->log(
+                	Mage::helper('atos')->__('Wrong order Id: "%s".', $orderId)
+                );
+                
+                Mage::app()->getResponse()
+                        ->setHeader('HTTP/1.1', '503 Service Unavailable')
+                        ->sendResponse();
+                exit;
+            }
+        }
+        return $this->_order;
+    }
 	
 	/*
 	 *
@@ -161,152 +227,152 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 	 * @return
 	 *
 	 */
-	protected function _updateOrderState(Mage_Sales_Model_Order $order) 
+	protected function _processOrder()
 	{
-		if (! $order->getId()) {
-			return;
-		}
+		// Get order to update
+        $this->_getOrder();
 		
 		/* Retrieve payment method object */
-		$payment = $order->getPayment()->getMethodInstance();
+		$payment = $this->_order->getPayment()->getMethodInstance();
 		
-        switch ($this->getAtosResponse('response_code')) {
+        switch ($this->_atosResponse['response_code']) {
             // Success order
             case '00':
-                if ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED) {
-                	$order->unhold();
-                }
+                // Update payment
+                $this->_processOrderPayment();
                 
-                /*
-                 * Dans l'eventualité où aucun statut de commande serait configuré 
-                 * depuis le BO ATOS pour un paiement accepté
-                 */
-                if (!$status = $payment->getConfig()->order_status_payment_accepted) {
-                	$status = $order->getStatus();
-                }
-
-                $message = Mage::helper('atos')->__('Payment accepted by Atos');
-
-                if ($status == Mage_Sales_Model_Order::STATE_PROCESSING) {
-                    $order->setStatus(
-                    	Mage_Sales_Model_Order::STATE_PROCESSING, $status, $message
-                    );
-                } else if ($status == Mage_Sales_Model_Order::STATE_COMPLETE) {
-                    $order->setStatus(
-                    	Mage_Sales_Model_Order::STATE_COMPLETE, $status, $message, null, false
-                    );
-                } else {
-                	$order->addStatusToHistory($status, $message, true);
-                }
-
-                // Create invoice
-				if ($payment->getConfig()->invoice_create) {
-                    Mage::helper('atos')->saveInvoice($order);
+				// Create invoice
+                if ($this->_invoiceFlag) {
+                    $this->_processOrderInvoice();
 				}
 				
-				$order->save();
+				$this->_order->save();
 
-                if (!$order->getEmailSent()) {
-                	$order->sendNewOrderEmail();
+				// Send order confirmation email
+                if (!$this->_order->getEmailSent() && $this->_order->getCanSendNewEmailFlag()) {
+                    try {
+                        if (method_exists($this->_order, 'queueNewOrderEmail')) {
+                            $this->_order->queueNewOrderEmail();
+                        } else {
+                            $this->_order->sendNewOrderEmail();
+                        }
+                    } catch (Exception $e) {
+                        Mage::logException($e);
+                    }
+                }                
+                // Send invoice email
+                if ($this->_invoiceFlag) {
+                    try {
+                        $this->_invoice->sendEmail();
+                    } catch (Exception $e) {
+                        Mage::logException($e);
+                    }
                 }
                 break;
 
+            // Cancel order
             default:
-                // Cancel order
-                $messageError = Mage::helper('atos')->__('Customer was rejected by Atos');
-
-                if ($order->getState() == Mage_Sales_Model_Order::STATE_HOLDED) {
-                    $order->unhold();
-                }
-
-                /*
-                 * Dans l'eventualité où aucun statut de commande serait configuré depuis le BO ATOS pour un paiement refusé
-                 */
-                if (!$state = $payment->getConfig()->order_status_payment_refused) {
-                    $state = $order->getState();
-                }
-
-                $order->addStatusToHistory($state, $messageError);
-
-                if ($state == Mage_Sales_Model_Order::STATE_HOLDED && $order->canHold()) {
-                	$order->hold();
-                }
-                
-				$order->save();
+            	$this->_processOrderPayment();
+            
+				$this->_order->cancel()
+					->save();
                 
                 break;
         }
     }
 	
-	public function saveTransaction(Varien_Object $payment)
+	protected function _processOrderPayment()
 	{
-		$atosPaymentResponse = $this->getAtosResponse();
-		$data = serialize($atosPaymentResponse);
-		
-		$payment->setCcType($atosPaymentResponse['payment_means'])
-			->setCcTransId($atosPaymentResponse['transaction_id'])
-			->setAdditionalData($data);
+		try {
+			$payment = $this->_order->getPayment();
 			
-		if ($ccNumber = $this->getApiResponse()->getCcNumberEnc($atosPaymentResponse['card_number'])) {
-			$payment->setCcNumberEnc($ccNumber);
-		}
-		if ($ccLast4 = $this->getApiResponse()->getCcLast4($atosPaymentResponse['card_number'])) {
-			$payment->setCcLast4($ccLast4);
-		}
-		
-		// Transaction acceptée
-		if ($atosPaymentResponse['response_code'] == '00') {
-			$transactionType = Mage_Sales_Model_Order_Payment_Transaction::TYPE_ORDER;
-		} else {
-		// Transaction refusée
-			$transactionType = Mage_Sales_Model_Order_Payment_Transaction::TYPE_VOID;
-		}
-		
-		$transactionDetails = array(
-        	'is_transaction_closed' => 1
-        );
-		
-		$this->_addTransaction($payment, $atosPaymentResponse['transaction_id'], $transactionType, $transactionDetails, $atosPaymentResponse);
-		$payment->save();
-
+			/*
+			 *
+			 * Payment
+			 *
+			 */
+			$paymentDetails = array(
+				'transaction_id' => $this->_atosResponse['transaction_id'],
+				'cc_type' => $this->_atosResponse['payment_means'],
+				'cc_trans_id' => $this->_atosResponse['transaction_id']
+			);
+				
+			if ($ccNumber = $this->getApiResponse()->getCcNumberEnc($this->_atosResponse['card_number'])) {
+				$paymentDetails['cc_number_enc'] = $ccNumber;
+				$paymentDetails['cc_exp_month'] = substr($this->_atosResponse['card_validity'], 4, 2);
+				$paymentDetails['cc_exp_year'] = substr($this->_atosResponse['card_validity'], 0, 4);
+			}
+			if ($ccLast4 = $this->getApiResponse()->getCcLast4($this->_atosResponse['card_number'])) {
+				$paymentDetails['cc_last_4'] = $ccLast4;
+			}
+			
+	        foreach ($paymentDetails as $key => $value) {
+	            $payment->setData($key, $value);
+	        }
+	        
+	        $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, $this->_atosResponse);
+			
+			switch ($this->_atosResponse['response_code']) 
+			{
+				case '00':
+			        if (!$this->_order->isCanceled() && $payment->getMethodInstance()->canAuthorize()) 
+			        {
+				        $payment->authorize(true, $this->_order->getBaseGrandTotal());
+				        $payment->setAmountAuthorized($this->_order->getTotalDue());
+				        
+				        if ($this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_CAPTURE ||
+				        	$this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_AUTHORIZE) {
+					        $this->_invoiceFlag = true;
+			            }
+			        }
+			        break;
+			    default:
+					$transaction = $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_VOID);
+					$transaction->save();
+				    	
+				    $payment->cancel();
+			        break;
+			}
+			
+			$payment->save();
+	        $this->_order->save();
+	        
+        } catch (Exception $e) {
+            Mage::logException($e);
+            Mage::app()->getResponse()
+                    ->setHeader('HTTP/1.1', '503 Service Unavailable')
+                    ->sendResponse();
+            exit;
+        }
 		return $this;
 	}
-	
-	/**
-     * Add payment transaction
-     *
-     * @param Mage_Sales_Model_Order_Payment $payment
-     * @param string $transactionId
-     * @param string $transactionType
-     * @param array $transactionDetails
-     * @param array $transactionAdditionalInfo
-     * @return null|Mage_Sales_Model_Order_Payment_Transaction
-     */
-    protected function _addTransaction(Mage_Sales_Model_Order_Payment $payment, $transactionId, $transactionType,
-        array $transactionDetails = array(), array $transactionAdditionalInfo = array(), $message = false
-    ) {
-
-        $payment->setTransactionId($transactionId);
-        $payment->resetTransactionAdditionalInfo();
-        foreach ($transactionDetails as $key => $value) {
-            $payment->setData($key, $value);
+    
+    protected function _processOrderInvoice() 
+    {
+        if ($this->_order->canInvoice()) {
+		    try {
+	            $this->_invoice = $this->_order->prepareInvoice();
+	            $this->_invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+	            $this->_invoice->register();
+	            
+	            $transactionSave = Mage::getModel('core/resource_transaction')
+	                    ->addObject($this->_invoice)
+	                    ->addObject($this->_invoice->getOrder())
+	                    ->save();
+	                    
+	            $this->_order->addStatusHistoryComment(
+	            	Mage::helper('atos')->__('Invoice %s was created', $this->_invoice->getIncrementId())
+	            );
+	                    
+	        } catch (Exception $e) {
+	            Mage::logException($e);
+	            Mage::app()->getResponse()
+	                    ->setHeader('HTTP/1.1', '503 Service Unavailable')
+	                    ->sendResponse();
+	            exit;
+	        }
+	        
+			return $this->_invoice->getIncrementId();
         }
-		
-        if ($transactionAdditionalInfo) {
-            $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, $transactionAdditionalInfo);
-        }
-		
-        $transaction = $payment->addTransaction($transactionType, null, false , $message);
-        foreach ($transactionDetails as $key => $value) {
-            $payment->unsetData($key);
-        }
-        $payment->unsLastTransId();
-
-        /**
-         * It for self using
-         */
-        $transaction->setMessage($message);
-
-        return $transaction;
     }
  }

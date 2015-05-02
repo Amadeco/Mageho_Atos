@@ -13,99 +13,24 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
-class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Abstract
+class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
 {
     protected $_code  = Mageho_Atos_Model_Config::METHOD_ATOS_SIPS_PAYMENT_SEVERAL;
     protected $_formBlockType = 'atos/several_form';
 	protected $_infoBlockType = 'atos/several_info';
 
     /**
-     * Config instance
-     * @var Mageho_Atos_Model_Config
-     */
-    protected $_config = null;
-
-    /**
      * Availability options
      */
-    protected $_canUseInternal = false;
+    protected $_canAuthorize = true;
+    protected $_canCapture = true;
     protected $_canUseCheckout = true;
     protected $_isInitializeNeeded = true;
     protected $_canUseForMultishipping = false;
-	
-	/**
-	 * Object private variables
-	 */
-	private $_url;
-	private $_message;
-	private $_error;
-	
-	public function callRequest()
-    {
-		$params = array(
-			'object' => $this,
-			'amount' => $this->_getAmount(),
-			'order_id' => $this->_getOrderId(),
-			'currency_code' => $this->getConfig()->getCurrencyCode($this->_getQuote()->getQuoteCurrencyCode()),
-			'customer_id' => $this->_getCustomerId(),
-			'customer_email' => $this->_getCustomerEmail(),
-			'customer_ip_address' => $this->_getCustomerIpAddress(),
-			'payment_means' => $this->getPaymentMeans(),
-			'normal_return_url' => $this->getNormalReturnUrl(),
-			'cancel_return_url' => $this->getCancelReturnUrl(),
-			'automatic_response_url' => $this->getAutomaticReturnUrl(),
-			'templatefile' => $this->getConfig()->templatefile,
-			'capture_mode' => 'PAYMENT_N',
-			'capture_day' => '0'
-		);
-		
-		$datafieldToAdd = array(
-			'NB_PAYMENT' => Mage::helper('atos')->getNbPayment(),
-			'PERIOD' => 30,
-			'INITIAL_AMOUNT' => round($this->_getAmount() / Mage::helper('atos')->getNbPayment())
-		);
-		
-		$params['cmd'] = $this->getConfig()->getDatafield($datafieldToAdd);
-		
-		$request = new Mageho_Atos_Model_Api_Request($params);		
-		
-        if ($request->getError()) {
-			$this->_error = true;
-	        $this->_message = $request->getDebug();
-			
-			if ($this->getDebug()->getRequestCmd()) {
-				$this->_message.= "\n\n" . $this->getDebug()->getRequestCmd();
-			}
-		} else {
-			$this->_error = false;
-	        $this->_url = $request->getUrl();
-			$this->_message = $request->getHtml();
-		}
-    }
-
-    public function getUrl() 
-	{	
-	    return $this->_url;
-	}
-	
-	public function getHtml() 
-	{
-	    return $this->_message;
-	}
-
-    public function getError() 
-	{
-	    return $this->_error;
-	}
-	
-	public function getPaymentMeans()
-	{
-	    return explode(',', $this->getConfig()->payment_means);
-	}
 	
 	/**
      * Check whether payment method can be used
@@ -120,85 +45,72 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Abstract
         
         return false;
     }
-	
-	/**
-     * Config instance getter
-     * @return Mageho_Atos_Model_Config
-     */
-    public function getConfig()
+    
+	public function callRequest()
     {
-        if (null === $this->_config) {
-            $params = array($this->_code);
-            if ($store = $this->getStore()) {
-                $params[] = is_object($store) ? $store->getId() : $store;
-            }
-            $this->_config = Mage::getModel('atos/config', $params);
-        }
-        return $this->_config;
-    }
-	
-	/**
-     * Custom getter for payment configuration
-     *
-     * @param string $field
-     * @param int $storeId
-     * @return mixed
-     */
-    public function getConfigData($field, $storeId = null)
-    {
-        return $this->getConfig()->$field;
-    }
-	
-    /**
-     * Assign data to info model instance
-     *
-     * @param   mixed $data
-     * @return  Mage_Payment_Model_Info
-     */
-    public function assignData($data)
-    {
-        if (!($data instanceof Varien_Object)) {
-            $data = new Varien_Object($data);
-        }
+		$datafieldToAdd = array(
+			'NB_PAYMENT' => $this->_getNbPayment(),
+			'PERIOD' => 30,
+			'INITIAL_AMOUNT' => $this->_getFirstAmount()
+		);
 		
-		if ($data->getAtosSeveralPaymentMeans()) {
-	        $this->getAtosSession()->setAtosSeveralPaymentMeans($data->getAtosSeveralPaymentMeans());
+		$params = array(
+			'object' => $this,
+			'amount' => $this->_getAmount(),
+			'order_id' => $this->_getOrderId(),
+			'currency_code' => $this->getConfig()->getCurrencyCode($this->_getQuote()->getQuoteCurrencyCode()),
+			'customer_id' => $this->_getCustomerId(),
+			'customer_email' => $this->_getCustomerEmail(),
+			'customer_ip_address' => $this->_getCustomerIpAddress(),
+			'payment_means' => $this->getPaymentMeans(),
+			'normal_return_url' => $this->_getNormalReturnUrl(),
+			'cancel_return_url' => $this->_getCancelReturnUrl(),
+			'automatic_response_url' => $this->_getAutomaticResponseUrl(),
+			'templatefile' => $this->getConfig()->templatefile,
+			'capture_mode' => 'PAYMENT_N',
+			'capture_day' => '0',
+			'cmd' => $this->getConfig()->getDatafield($datafieldToAdd)
+		);
+		
+		$request = new Mageho_Atos_Model_Api_Request($params);
+		
+        if ($request->getError()) {
+			$this->_error = true;
+	        $this->_html = $request->getDebug();
+			
+			if ($this->getDebug()->getRequestCmd()) {
+				$this->_html.= "\n\n" . $this->getDebug()->getRequestCmd();
+			}
+		} else {
+			$this->_error = false;
+	        $this->_url = $request->getUrl();
+			$this->_html = $request->getHtml();
 		}
-        return $this;
     }
-
-    /**
-     *  Form block description
-     *
-     *  @return	 object
-     */
-    public function createFormBlock($name)
-    {
-        $block = $this->getLayout()->createBlock($this->_formBlockType, $name)
-            ->setMethod($this->getConfig()->getMethodCode())
-            ->setPayment($this->getPayment());
-		
-        return $block;
-    }
-	 
-    /**
-     *  Return URL for cancel payment
-	 *
-     *  @return	  string Return cancel URL
-     */
-    public function getCancelReturnUrl()
-    {
-        return Mage::getUrl('atos/several/cancel', array('_secure' => true));
-    }
+	
+	public function getPaymentMeans()
+	{
+	    return explode(',', $this->getConfig()->payment_means);
+	}
 	
     /**
      *  Return URL for customer response
      *
      *  @return	  string Return customer URL
      */
-    public function getNormalReturnUrl()
+    public function _getNormalReturnUrl()
     {
         return Mage::getUrl('atos/several/normal', array('_secure' => true));
+    }
+		 
+    /**
+     *  Return URL for cancel payment
+	 *
+     *  @return	  string Return cancel URL
+     */
+    public function _getCancelReturnUrl()
+    {
+        return Mage::getUrl('atos/several/cancel', array('_secure' => true));
     }
 	
     /**
@@ -206,7 +118,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Abstract
      *
      *  @return	  string Return automatic URL
      */
-    public function getAutomaticReturnUrl()
+    public function _getAutomaticResponseUrl()
     {
         return Mage::getUrl('atos/automatic/index', array('_secure' => true));
     }
@@ -219,5 +131,20 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Abstract
     public function getOrderPlaceRedirectUrl()
     {
         return Mage::getUrl('atos/several/redirect', array('_secure' => true));
+    }
+    
+    protected function _getNbPayment()
+    {
+        return Mage::helper('atos')->getNbPayment();
+    }
+    
+    /**
+     * Get first amount to capture
+     *
+     * @return string
+     */
+    protected function _getFirstAmount()
+    {
+        return round($this->_getAmount() / $this->_getNbPayment());
     }
 }

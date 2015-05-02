@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
@@ -25,11 +25,10 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
         $this->loadLayout();
         		
 		Mage::dispatchEvent('atos_controller_standard_redirect_render_before', array(
-				'checkout_session' => $this->getCheckoutSession(), 
-				'request' => $this->getRequest(),
-				'layout' => $this->getLayout()
-			)
-		);
+			'checkout_session' => $this->getCheckoutSession(), 
+			'request' => $this->getRequest(),
+			'layout' => $this->getLayout()
+		));
         
 		$this->renderLayout();
 		
@@ -39,122 +38,140 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
 
 	public function normalAction() 
 	{
-        $this->setAtosResponse($_REQUEST);
+        $this->processIpnResponse($_REQUEST);
 		
-		$order = Mage::getModel('sales/order')->loadByIncrementId($this->getAtosResponse('order_id'));
+		$atosApiResponse = $this->getApiResponse();
+		$response = $this->getAtosResponse();
 		
-		switch ($this->getAtosResponse('response_code'))
+		$order = Mage::getModel('sales/order');
+		if ($response['order_id']) {
+			$order->loadByIncrementId($response['order_id']);
+		}
+		
+		switch ($response['response_code'])
 		{
 		    case '00':
-                if ($order->getId()) 
-                {
-					if (!$status = $this->getAtosPaymentStandard()->getConfig()->order_status_payment_accepted) {
-						$status = $order->getStatus();
-					}
-					
-                    $order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
+                if ($order->getId())  {
+                    $order->addStatusHistoryComment(Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
                           ->save();
                 }
-		    
+                
+				$this->getAtosSession()->unsAtosStandardPaymentMeans();
 				$this->getCheckoutSession()->getQuote()->setIsActive(false)->save();
-                $this->_redirect('checkout/onepage/success', array('_secure' => true));
-                return;
+				
+				// Set redirect URL
+                $response['redirect_url'] = 'checkout/onepage/success';
 			    break;
+			    
 			default:
-				switch ($this->getAtosResponse('cvv_response_code')) {
+				$error = $atosApiResponse->getResponseLabel($response);
+						
+				switch ($response['cvv_response_code']) 
+				{
 					case '4E':
 					case '': // specific cvv_response_code for AMEX and FINAREF credit card
-						$error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')).'<br />';
-						$error.= $this->getApiResponse()->getCvvResponseLabel($this->getAtosResponse('cvv_response_code')).'<br />';
-						
-						$this->getAtosSession()->setRedirectMessage($error);
-					break;
+						$error.= ' - '  . $atosApiResponse->getCvvResponseLabel($response);
+						break;
 					default:
-						$error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')).'<br />';
-						$error.= $this->getApiResponse()->getBankResponseLabel($this->getAtosResponse('bank_response_code')).'<br />';
+						$error.= ' - '  . $atosApiResponse->getBankResponseLabel($response);
+						break;
+				}
 						 
-						$this->getAtosSession()->setRedirectMessage($error);
-					break;
+				$this->getAtosSession()->setRedirectMessage($error);
+				
+                // Set redirect URL
+				if ($this->getConfig()->redirect) {
+					$response['redirect_url'] = '*/*/failure';
+				} else {
+		        	$response['redirect_url'] = 'checkout/cart';
 				}
 				break;
 		}
 				
 		Mage::dispatchEvent('atos_controller_standard_normal', array(
-			'atos_response' => $this->getAtosResponse(),
+			'atos_response' => $response,
 			'atos_session' => $this->getAtosSession(),
 			'checkout_session' => $this->getCheckoutSession(),
 			'order' => $order->getId() ? $order : NULL,
 			'request' => $this->getRequest()
 		));
 		
-		if ($this->getConfig()->redirect) {
-			$this->_redirect('*/*/failure', array('_secure' => true));
-		} else {
-			$this->_redirect('checkout/cart', array('_secure' => true));
-		}
+        $this->_redirect($response['redirect_url'], array('_secure' => true));
 	}
 	
 	public function cancelAction()
 	{
-		$this->setAtosResponse($_REQUEST);
+		$this->processIpnResponse($_REQUEST);
 		
-		$order = Mage::getModel('sales/order')->loadByIncrementId($this->getAtosResponse('order_id'));
+		$atosApiResponse = $this->getApiResponse();
+		$response = $this->getAtosResponse();
 		
-		switch ($this->getAtosResponse('response_code')) {
+		// Set redirect URL
+		if ($this->getConfig()->redirect) {
+			$response['redirect_url'] = '*/*/failure';
+		} else {
+        	$response['redirect_url'] = 'checkout/cart';
+		}
+		
+		$error = $atosApiResponse->getResponseLabel($response);
+		
+		switch ($response['response_code']) 
+		{
 			case '17':
-				$error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')) . '<br />';
 				$error.= Mage::helper('atos')->__('Choose an another payment method or contact us by phone at %s to validate your order.', Mage::getStoreConfig('general/store_information/phone'));
 					
-				$this->getAtosSession()->setRedirectTitle(Mage::helper('atos')->__('Payment has been canceled with success.'));
-				$this->getAtosSession()->setRedirectMessage($error);	
+				$this->getAtosSession()
+					->setRedirectTitle(Mage::helper('atos')->__('Payment has been canceled with success.'))
+					->setRedirectMessage($error);
+					
 				break;
-			
 			default:
-				switch ($this->getAtosResponse('cvv_response_code')) {
+				switch ($response['cvv_response_code']) 
+				{
 					case '4E':
 					case '': // specific cvv_response_code for AMEX and FINAREF credit card
-						$error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')).'<br />';
-						$error.= $this->getApiResponse()->getCvvResponseLabel($this->getAtosResponse('cvv_response_code')).'<br />';
-
-						$this->getAtosSession()->setRedirectTitle(Mage::helper('atos')->__('Your order has been refused'));
-						$this->getAtosSession()->setRedirectMessage($error);
-					break;
+						$error.= ' - '  . $atosApiResponse->getCvvResponseLabel($response);
+						break;
 					default:
-						 $error = $this->getApiResponse()->getResponseLabel($this->getAtosResponse('response_code')).'<br />';
-						 $error.= $this->getApiResponse()->getBankResponseLabel($this->getAtosResponse('bank_response_code')).'<br />';
-								 
-						 $this->getAtosSession()->setRedirectTitle(Mage::helper('atos')->__('Your order has been refused'));
-						 $this->getAtosSession()->setRedirectMessage($error);
-					break;
+						$error.= ' - '  . $atosApiResponse->getBankResponseLabel($response);
+						break;
 				}
+								 
+				$this->getAtosSession()
+					->setRedirectTitle(Mage::helper('atos')->__('Your order has been refused'))
+					->setRedirectMessage($error);
+						
 				break;
 		}
 		
-		if ($order->getId()) {
-			Mage::helper('atos')->reorder($order);
-			$order->cancel()
-				->addStatusToHistory($order->getStatus(), $error)
+		$order = Mage::getModel('sales/order');
+		if ($response['order_id']) 
+		{
+			$order->loadByIncrementId($response['order_id'])
+				->cancel()
+				->addStatusHistoryComment($error)
 				->save();
+			
+	    	$cart = $this->getCart();
+	    	if (! $cart->getQuote()->getItemsCount()) {
+				Mage::helper('atos')->reorder($order);
+			}
 		}
 		
 		Mage::dispatchEvent('atos_controller_standard_cancel', array(
-			'atos_response' => $this->getAtosResponse(),
+			'atos_response' => $response,
 			'atos_session' => $this->getAtosSession(),
 			'checkout_session' => $this->getCheckoutSession(),
 			'order' => $order->getId() ? $order : NULL,
 			'request' => $this->getRequest()
 		));
 		
-		if ($this->getConfig()->redirect) {
-			$this->_redirect('*/*/failure', array('_secure' => true));
-		} else {
-			$this->_redirect('checkout/cart', array('_secure' => true));
-		}
+		$this->_redirect($response['redirect_url'], array('_secure' => true));
 	}
 	
-	/**
-	* When has error in treatment
-	*/
+	/*
+	 * When has error in treatment
+	 */
     public function failureAction()
     {
     	$cart = $this->getCart();
@@ -166,20 +183,31 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
         $this->loadLayout();
         $this->_initLayoutMessages('checkout/session');
         $this->_initLayoutMessages('catalog/session');
+
+        $paymentMeans = $this->getAtosSession()->getAtosStandardPaymentMeans();
+        
+   		// Set redirect URL
+        $response['redirect_url'] = 'checkout/cart';
+        $response['button_url'] = Mage::getUrl('atos/standard/redirect', array('_secure' => true));
+        $response['button_text'] = Mage::helper('atos')->__('Pay My Order');
+        
+   		Mage::dispatchEvent('atos_controller_standard_failure', array(
+	   		'atos_response' => $response,
+			'atos_session' => $this->getAtosSession(),
+			'checkout_session' => $this->getCheckoutSession(),
+		));
         
         if ($blockAtosPaymentFailure = $this->getLayout()->getBlock('atos.payment.failure')) {
 	        $blockAtosPaymentFailure->setTitle($this->getAtosSession()->getRedirectTitle())
 	        	->setMessage($this->getAtosSession()->getRedirectMessage());
+	        
+	        $blockAtosPaymentFailure->setButtonUrl($response['button_url'])
+	        	->setButtonText($response['button_text']);
         }
-        
-        $paymentMeans = $this->getAtosSession()->getAtosStandardPaymentMeans();
-        
-   		Mage::dispatchEvent('atos_controller_standard_failure_render_before', array(
-			'atos_session' => $this->getAtosSession(),
-			'checkout_session' => $this->getCheckoutSession(),
-			'block' => $blockAtosPaymentFailure,
-			'layout' => $this->getLayout()
-		));
+		
+		if (! $this->getConfig()->redirect) {
+        	$this->_redirect($response['redirect_url'], array('_secure' => true));
+        }
         
         $this->getAtosSession()->unsetAll();
         $this->getAtosSession()->setAtosStandardPaymentMeans($paymentMeans);

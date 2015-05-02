@@ -137,6 +137,7 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 	    }
 		
 		/* Save command line in atos session for debug purpose */
+		Mage::getSingleton('atos/debug')->log($request);
 		Mage::getSingleton('atos/session')->setRequestCmd($request);
 		$this->setRequest($request);
 	}

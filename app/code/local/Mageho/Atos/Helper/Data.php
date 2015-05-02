@@ -13,49 +13,17 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
 class Mageho_Atos_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    /**
-     *  Save invoice for order
-     *
-     *  @param    Mage_Sales_Model_Order $order
-     *  @return	  boolean Can save invoice or not
-     */
-    public function saveInvoice(Mage_Sales_Model_Order $order)
-    {
-        if ($order->canInvoice()) {
-            $convertor = Mage::getModel('sales/convert_order');
-			$invoice = $convertor->toInvoice($order);
-                       
-			foreach ($order->getAllItems() as $orderItem) 
-			{
-                try {   
-                    $item = $convertor->itemToInvoiceItem($orderItem);
-					/// Prise en charge des produits packages sans quantité réelle
-                    $item->setQty($orderItem->isDummy() ? 1 : $orderItem->getQtyToInvoice()); 
-                    $invoice->addItem($item);
-                } catch (Exception $e) {}
-            }
-			   
-            $invoice->collectTotals();
-            $invoice->register();
-                      
-		    Mage::getModel('core/resource_transaction')
-              ->addObject($invoice)
-              ->addObject($invoice->getOrder())
-              ->save();
-						 
-            $order->addStatusToHistory($order->getStatus(), Mage::helper('atos')->__('Invoice %s was created', $invoice->getIncrementId()), true);
-			return true;
-        } else {
-        	return false;
-        }
-    }
-
+	public function getNbPayment()
+	{
+		return (int) Mage::getSingleton('atos/method_several')->getConfig()->nb_payment;	
+	}
+	
     /**
      *  Fill checkout cart with current order id
      *
@@ -112,9 +80,4 @@ class Mageho_Atos_Helper_Data extends Mage_Core_Helper_Abstract
         }
         return Mage::helper('core')->jsonEncode($config);
     }
-	
-	public function getNbPayment()
-	{
-		return (int) Mage::getSingleton('atos/method_several')->getConfig()->nb_payment;	
-	}
 }

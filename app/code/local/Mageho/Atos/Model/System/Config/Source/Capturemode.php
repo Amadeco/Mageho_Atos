@@ -13,30 +13,15 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
 class Mageho_Atos_Model_System_Config_Source_Capturemode extends Mageho_Atos_Model_Abstract
 {
-	const PAYMENT_ACTION_CAPTURE = 'AUTHOR_CAPTURE';
-	
-	/* 
-	 * Ce mode de capture est dangereux
-	 * Si on oublie de valider la transaction sur le BO de la banque, pas de débit, si supérieur à 7 jours, le débit n'est plus autorisé, la banque fait une nouvelle demande d'autorisation
-	 * 
-	 * Si activé, ne pas oublier d'enlever le champs depends du fichier system.xml du champs "capture_day" 
-	 */
-    const PAYMENT_ACTION_AUTHORIZE = 'VALIDATION';
-
     public function toOptionArray()
     {
-        $options = array(
-            array('value' => '', 'label' => Mage::helper('atos')->__('Normal')),
-            array('value' => self::PAYMENT_ACTION_CAPTURE, 'label' => Mage::helper('atos')->__('Author Capture')),
-			array('value' => self::PAYMENT_ACTION_AUTHORIZE, 'label' => Mage::helper('atos')->__('Validation'))
-        );
-        
-        return $options;
+        $configModel = Mage::getModel('atos/config');
+        return $configModel->getPaymentActions();
     }
 }

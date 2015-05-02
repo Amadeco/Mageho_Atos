@@ -23,9 +23,7 @@ class Mageho_Atos_Model_Debug extends Mageho_Atos_Model_Abstract
 
 	public function getRequestCmd()
 	{
-	    if ($cmd = $this->getAtosSession()->getRequestCmd()) {
-		    return $cmd;
-		}
+		return $this->getAtosSession()->getRequestCmd();
 	}
 	
 	public function log($message, $type = Zend_Log::ERR)
@@ -37,7 +35,6 @@ class Mageho_Atos_Model_Debug extends Mageho_Atos_Model_Abstract
 	{
 		$remoteAddr = Mage::helper('core/http')->getRemoteAddr(false);
 		$message = Mage::helper('atos')->__('IP registered from automatic response : %s', $remoteAddr);
-		
 		self::log($message, Zend_Log::INFO);
 	}
 	

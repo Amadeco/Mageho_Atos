@@ -8,13 +8,13 @@
 ###############################################################################
 #
 # URL de retour automatique de la reponse du paiement
-AUTO_RESPONSE_URL!http://www.mageho.com/index.php/atos/automatic/index/?___SID=U!
+AUTO_RESPONSE_URL!!
 #
 # URL de traitement d'un paiement refusé
-CANCEL_URL!http://www.mageho.com/index.php/atos/standard/cancel/?___SID=U!
+CANCEL_URL!!
 #
 # URL de retour suite à un paiement accepté
-RETURN_URL!http://www.mageho.com/index.php/atos/standard/normal/?___SID=U!
+RETURN_URL!!
 #
 # Logo central
 ADVERT!!
@@ -26,7 +26,7 @@ BACKGROUND!!
 CANCEL_LOGO!!
 #
 # Liste des cartes acceptées par le commercant
-CARD_LIST!CB,MASTERCARD,VISA,AURORE,AMEX,DINERS,JCB,COFINOGA,FINAREF,PAYLIB!
+CARD_LIST!CB,MASTERCARD,VISA,AMEX,DINERS,JCB,DELTA,SWITCH,SOLO,AURORE,COFINOGA,FINAREF,PAYLIB,PAYPAL!
 #
 # Code devise (978=EURO)
 CURRENCY!978!
@@ -47,7 +47,7 @@ MERCHANT_COUNTRY!fr!
 MERCHANT_LANGUAGE!fr!
 #
 # Liste des moyens de paiement acceptés
-PAYMENT_MEANS!CB,2,MASTERCARD,2,VISA,2,AURORE,2,AMEX,2,DINERS,2,JCB,2,COFINOGA,2,FINAREF,2,PAYLIB,2!
+PAYMENT_MEANS!CB,2,MASTERCARD,2,VISA,2,AMEX,2,DINERS,2,JCB,2,DELTA,2,SWITCH,2,SOLO,2,AURORE,2,COFINOGA,2,FINAREF,2,PAYLIB,2,PAYPAL,2!
 #
 # Logo de retour a la boutique apres le paiement (bouton si non renseigné)
 RETURN_LOGO!!

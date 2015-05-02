@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
@@ -26,12 +26,13 @@ class Mageho_Atos_Block_Standard_Redirect extends Mage_Core_Block_Template
 		
 		if ($standard->getError()) 
 		{
-		    return '<pre>'.$standard->getHtml().'</pre>';
+		    return '<pre>'.$standard->getSystemHtml().'</pre>';
 		} else {
-			if ($paymentMeans = Mage::getSingleton('atos/session')->getAtosStandardPaymentMeans()) {
+			if ($paymentMeans = Mage::getSingleton('atos/session')->getAtosStandardPaymentMeans()) 
+			{
 				$this->setSelectedMethod($paymentMeans)
-					->setFormUrl($standard->getUrl())
-					->setHtml($standard->getHtml())
+					->setSystemFormUrl($standard->getSystemUrl())
+					->setSystemHtml($standard->getSystemHtml())
 					->setTemplate('mageho/atos/standard/redirect.phtml');
 					
 				return parent::_toHtml();
