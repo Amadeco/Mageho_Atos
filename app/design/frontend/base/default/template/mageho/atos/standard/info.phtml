@@ -24,5 +24,10 @@
 	
 	<br />
 	
-	<p><?php echo $this->getMethod()->getTitle(); ?> (<?php echo $this->getSelectedMethod(); ?>)</p>
+	<p>
+		<?php echo $this->getMethod()->getTitle(); ?> 
+		<?php if ($this->getSelectedMethod()): ?>
+		(<?php echo $this->getSelectedMethod(); ?>)
+		<?php endif; ?>
+	</p>
 </div>
