@@ -294,7 +294,8 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 			$paymentDetails = array(
 				'transaction_id' => $this->_atosResponse['transaction_id'],
 				'cc_type' => $this->_atosResponse['payment_means'],
-				'cc_trans_id' => $this->_atosResponse['transaction_id']
+				'cc_trans_id' => $this->_atosResponse['transaction_id'],
+				'additional_data' => serialize($this->_atosResponse)
 			);
 				
 			if ($ccNumber = $this->getApiResponse()->getCcNumberEnc($this->_atosResponse['card_number'])) {
