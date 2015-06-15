@@ -106,4 +106,8 @@ class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 		
 		return $finalProductPrice;
 	}
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/master
