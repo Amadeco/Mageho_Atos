@@ -240,6 +240,7 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
      */
     protected function _getAmount()
     {
+        $total = 0;
         if ($_order = $this->_getOrder()) 
         {
             /*
@@ -258,9 +259,7 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
 	            $decimals = 2;
             }
             $total = number_format($_order->getTotalDue(), $decimals, '', '');
-        } else {
-            $total = 0;
-		}
+        }
 		return $total;
     }
 

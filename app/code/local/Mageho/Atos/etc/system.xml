@@ -312,12 +312,6 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
-<<<<<<< HEAD
-=======
-							<depends>
-								<capture_mode separator=",">AUTHOR_CAPTURE,VALIDATION</capture_mode>
-							</depends>
->>>>>>> FETCH_HEAD
 						</capture_day>
 						<cms_block translate="label">
 							<label>Display a CMS block inside the payment form</label>

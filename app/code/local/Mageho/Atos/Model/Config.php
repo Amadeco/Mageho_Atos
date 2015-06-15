@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
@@ -26,12 +26,11 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     const METHOD_ATOS_SIPS_PAYMENT_STANDARD = 'atoswps';
 	const METHOD_ATOS_SIPS_PAYMENT_SEVERAL = 'atoswpseveral';
 	
-
     /**
      * Atos Sips Standard Mode Action
      * @var string
      */
-	const PAYMENT_ACTION_CAPTURE = 'AUTHOR_CAPTURE';
+	const PAYMENT_ACTION_AUTHORIZE_CAPTURE = 'AUTHOR_CAPTURE';
 	
 	/* 
 	 * Ce mode de capture est dangereux
@@ -181,8 +180,9 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         switch ($action) {
             case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE:
                 return self::PAYMENT_ACTION_AUTHORIZE;
-            case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE :
-                return self::PAYMENT_ACTION_CAPTURE;
+            default:
+            case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE:
+                return self::PAYMENT_ACTION_AUTHORIZE_CAPTURE;
         }
     }
     
@@ -194,8 +194,8 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     public function getPaymentActions()
     {
         $paymentActions = array(
-            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE => Mage::helper('adminhtml')->__('Author Capture'),
-            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE => Mage::helper('adminhtml')->__('Validation')
+            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE => Mage::helper('adminhtml')->__('Validation'),
+            Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE => Mage::helper('adminhtml')->__('Author Capture')
         );
         return $paymentActions;
     }
@@ -370,23 +370,23 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 			}
 		}
 		
-		/* Donnée spécifique Aurore: Date de naissance */
-		if ($this->getAtosSession()->getAtosStandardPaymentMeans() == 'AURORE') 
+		switch ($this->getAtosSession()->getAtosStandardPaymentMeans())
 		{
-			if ($dob = $this->_getCustomerDob()) {
-				$datafield.= ',DATE_NAISSANCE=' . $dob;
-			}
-			$datafield.= ',MODE_REGLEMENT=MR_CREDIT';
-		}
-		
-		/* Donnée spécifique PayPal: Le numéro de commande PayPal */
-		if ($this->getAtosSession()->getAtosStandardPaymentMeans() == 'PAYPAL') 
-		{
-			if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) 
-			{
-				/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
-				$datafield.= ',PP_INVOICEID=' . $orderId;
-			}
+			/* Donnée spécifique Aurore: Date de naissance */
+			case 'AURORE':
+				if ($dob = $this->_getCustomerDob()) {
+					$datafield.= ',DATE_NAISSANCE=' . $dob;
+				}
+				$datafield.= ',MODE_REGLEMENT=MR_CREDIT';
+				break;
+				
+			/* Donnée spécifique PayPal: Le numéro de commande PayPal */
+			case 'PAYPAL':
+				if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) {
+					/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
+					$datafield.= ',PP_INVOICEID=' . $orderId;
+				}
+				break;
 		}
 		
 		/*
@@ -394,13 +394,17 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		 */
 		if ($this->getConfig()->bypass_enabled) 
 		{
-			$rule = Mage::getModel('salesrule/rule');
-			$rule->loadPost(unserialize($this->getConfig()->conditions));
-
-			$object = new Varien_Object(array('quote' => $this->_getQuote()));
-			
-			if ($rule->validate($object)) {
-				$datafield.= ',3D_BYPASS';
+			$conditions = unserialize($this->getConfig()->conditions);
+			if (is_array($conditions) && !empty($conditions))
+			{
+				$rule = Mage::getModel('salesrule/rule');
+				$rule->loadPost($conditions);
+	
+				$object = new Varien_Object(array('quote' => $this->_getQuote()));
+				
+				if ($rule->validate($object)) {
+					$datafield.= ',3D_BYPASS';
+				}
 			}
 		}
 		

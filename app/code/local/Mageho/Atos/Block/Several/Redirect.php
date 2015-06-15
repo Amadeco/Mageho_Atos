@@ -28,15 +28,12 @@ class Mageho_Atos_Block_Several_Redirect extends Mage_Core_Block_Template
 		{
 		    return '<pre>'.$several->getSystemHtml().'</pre>';
 		} else {
-			if ($paymentMeans = Mage::getSingleton('atos/session')->getAtosSeveralPaymentMeans()) 
-			{
-				$this->setSelectedMethod($paymentMeans)
-					->setSystemFormUrl($several->getSystemUrl())
-					->setSystemHtml($several->getSystemHtml())
-					->setTemplate('mageho/atos/several/redirect.phtml');
+			$this->setSelectedMethod(Mage::getSingleton('atos/session')->getAtosSeveralPaymentMeans())
+				->setSystemFormUrl($several->getSystemUrl())
+				->setSystemHtml($several->getSystemHtml())
+				->setTemplate('mageho/atos/several/redirect.phtml');
 					
-				return parent::_toHtml();
-			}
+			return parent::_toHtml();
 		}
     }
 }

@@ -22,16 +22,17 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
     protected $_code  = Mageho_Atos_Model_Config::METHOD_ATOS_SIPS_PAYMENT_STANDARD;
     protected $_formBlockType = 'atos/standard_form';
 	protected $_infoBlockType = 'atos/standard_info';
-
+	
     /**
-     * Availability options
+     * Payment Method features
+     * @var bool
      */
     protected $_canAuthorize = true;
     protected $_canCapture = true;
-    protected $_canUseCheckout = true;
-    protected $_isInitializeNeeded = true;
     protected $_canUseForMultishipping = false;
-	
+    protected $_isInitializeNeeded = true;
+    protected $_canUseInternal = true;
+    	
 	/**
      * Check whether payment method can be used
      * @param Mage_Sales_Model_Quote
@@ -80,6 +81,11 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
 	        $this->_url = $request->getUrl();
 			$this->_html = $request->getHtml();
 		}
+    }
+    
+    public function getAmount()
+    {
+	    return $this->_getAmount();
     }
 	
     /**

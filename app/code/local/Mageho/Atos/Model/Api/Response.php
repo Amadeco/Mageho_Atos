@@ -477,11 +477,17 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 		}
 	}
 	
-	public function formatAmount($amount)
+	public function formatAmount($amount, $currency = true)
 	{
 		$int = substr($amount, 0, -2);
 		$decimal = substr($amount, -2);
-		return Mage::helper('core')->currency($int . '.' . $decimal);
+		
+		if ($currency == true) 
+		{
+			return Mage::helper('core')->currency($int . '.' . $decimal);
+		} else {
+			return $int . '.' . $decimal;
+		}
 	}
 	
 	/*

@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
@@ -106,12 +106,21 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 			$parcomContent = str_replace('{{autoResponseUrl}}', Mage::getModel('atos/method_standard')->getAutomaticReturnUrl(), $parcomContent);
 			$parcomContent = str_replace('{{cancelUrl}}', Mage::getModel('atos/method_standard')->getCancelReturnUrl(), $parcomContent);
 			$parcomContent = str_replace('{{returnUrl}}', Mage::getModel('atos/method_standard')->getNormalReturnUrl(), $parcomContent);
-			$parcomContent = str_replace('{{cardList}}', implode(',', Mage::getModel('atos/system_config_source_paymentmeans')->getCCValues()), $parcomContent);
+			
+			
+			//$parcomContent = str_replace('{{cardList}}', implode(',', Mage::getModel('atos/system_config_source_paymentmeans')->getCCValues()), $parcomContent);
+			$parcomContent = str_replace('{{cardList}}', implode(',', Mage::getModel('atos/method_standard')->getPaymentMeans()), $parcomContent);
+			
 			$parcomContent = str_replace('{{currency}}', Mage::getModel('atos/config')->getCurrencyCode(Mage::app()->getStore()->getCurrentCurrencyCode()), $parcomContent);
 			$parcomContent = str_replace('{{language}}', Mage::getModel('atos/config')->getLanguageCode(), $parcomContent);
 			$parcomContent = str_replace('{{merchantCountry}}', Mage::getModel('atos/config')->getMerchantCountry(), $parcomContent);
 			$parcomContent = str_replace('{{merchantLanguage}}', Mage::getModel('atos/config')->getLanguageCode(), $parcomContent);
-			$parcomContent = str_replace('{{paymentMeans}}', implode(',2,', Mage::getModel('atos/system_config_source_paymentmeans')->getCCValues()) . ',2', $parcomContent);
+					
+	
+			//$parcomContent = str_replace('{{paymentMeans}}', implode(',2,', Mage::getModel('atos/system_config_source_paymentmeans')->getCCValues()) . ',2', $parcomContent);
+			$parcomContent = str_replace('{{paymentMeans}}', implode(',2,', Mage::getModel('atos/method_standard')->getPaymentMeans()) . ',2', $parcomContent);
+
+			
 			$parcomContent = str_replace('{{templateFilename}}', $this->getConfig()->templatefile, $parcomContent);
 			
 			$io->streamOpen($parcomFilename);

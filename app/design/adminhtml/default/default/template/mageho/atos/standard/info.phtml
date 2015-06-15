@@ -13,31 +13,29 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
- 
+  
  	$hash = unserialize($this->getInfo()->getAdditionalData());
- 	$apiResponse = Mage::getSingleton('atos/config')->getApiResponse();
+ 	$apiResponse = Mage::getSingleton('atos/api_response');
  	$hlpr = Mage::helper('atos'); 
 ?>
 
 <div id="atos-logo">&nbsp;</div>
-<p><strong><?php echo $this->getMethod()->getTitle(); ?></strong></p>
 
+<p><strong><?php echo $this->escapeHtml($this->getMethod()->getTitle()); ?></strong></p>
+
+<?php if ($this->isOrderPlacedFromFrontend()): ?>
 <ul class="messages">
 	<?php if (isset($hash['response_code'])): ?>
-	
 		<?php if ($hash['response_code'] == '00'): ?>
 	    <li class="success-msg"><?php echo $hlpr->__('Payment accepted by Atos'); ?></li>
 	    <?php else: ?>
 	    <li class="warning-msg"><?php echo $hlpr->__('Customer was rejected by Atos'); ?></li>
-	    <?php endif; ?>
-	    
+	    <?php endif; ?>	    
     <?php else: ?>
-    
     <li class="warning-msg"><?php echo $hlpr->__('The customer left without paying'); ?></li>
-    
     <?php endif; ?>
 </ul>
 
@@ -59,77 +57,59 @@
 </div>
 
 <div id="response" style="display:none">
-	<div class="grid">
-		<table class="border">
-			<tbody>
-				<tr>
-					<th><?php echo $hlpr->__('Transaction Number'); ?></th>
-					<td><?php echo $hash['transaction_id']; ?></td>
-				</tr>
-				
-				<?php if (isset($hash['capture_mode']) && !empty($hash['capture_mode'])): ?>
-				<tr class="even">
-					<th><?php echo $hlpr->__('Capture Mode'); ?></th>
-					<td><?php echo $hash['capture_mode']; ?></td>
-				</tr>
-				<?php endif; ?>
-				
-				<tr>
-					<th><?php echo $hlpr->__('Day before the capture'); ?></th>
-					<td>
-						<?php if (isset($hash['capture_day'])  && $hash['capture_day'] > 0): ?>
-						<?php echo $hash['capture_day']; ?>
-						<?php else: ?>
-						<?php echo $hlpr->__('Day before capture: immediate capture'); ?>
-						<?php endif; ?>
-					</td>
-				</tr>
+	
+	<table class="atowps">
+		<tbody>
+        	<tr>
+            	<td class="payment-means first"><img src="<?php echo $this->getCreditCardImgSrc(strtolower($hash['payment_means'])); ?>" alt="<?php echo $hash['payment_means']; ?>" /></td>
+                <td class="payment-infos last">
+					<ul>
+						<li><b><?php echo $hlpr->__('Transaction Number'); ?></b> <?php echo $hash['transaction_id']; ?></li>
 						
-				<?php if ($cc = $apiResponse->getCcNumberEnc($hash['card_number'])): ?>
-				<tr class="even">
-					<th><?php echo $hlpr->__('Credit card number'); ?></th>
-					<td><?php echo $cc; ?></td>
-				</tr>
-				<?php endif; ?>
-					
-				<?php if (isset($hash['cvv_response_code']) && $cvvResponseLabel = $apiResponse->getCvvResponseLabel($hash)): ?>
-				<tr>
-					<th><?php echo $hlpr->__('About CVV credit card'); ?></th>
-					<td><?php echo $cvvResponseLabel; ?></td>
-				</tr>
-				<?php endif; ?>
+						<?php if (isset($hash['capture_mode']) && !empty($hash['capture_mode'])): ?>
+						<li><b><?php echo $hlpr->__('Capture Mode'); ?></b> <?php echo $hash['capture_mode']; ?></li>
+						<?php endif; ?>
+						
+						<li>
+							<b><?php echo $hlpr->__('Day before the capture'); ?></b>
 							
-				<?php if (isset($hash['response_code']) && $responseLabel = $apiResponse->getResponseLabel($hash)): ?>
-				<tr class="even">
-					<th><?php echo $hlpr->__('Response code'); ?></th>
-					<td><?php echo $responseLabel; ?></td>
-				</tr>
-				<?php endif; ?>
+							<?php if (isset($hash['capture_day'])  && $hash['capture_day'] > 0): ?>
+							<?php echo $hash['capture_day']; ?>
+							<?php else: ?>
+							<?php echo $hlpr->__('Day before capture: immediate capture'); ?>
+							<?php endif; ?>
+						</li>
+								
+						<?php if ($cc = $apiResponse->getCcNumberEnc($hash['card_number'])): ?>
+						<li><b><?php echo $hlpr->__('Credit card number'); ?></b> <?php echo $cc; ?></li>
+						<?php endif; ?>
 							
-				<?php if (isset($hash['bank_response_code']) && $bankResponseLabel = $apiResponse->getBankResponseLabel($hash)): ?>
-				<tr>
-					<th><?php echo $hlpr->__('Response code of the bank'); ?></th>
-					<td><?php echo $bankResponseLabel; ?></td>
-				</tr>
-				<?php endif; ?>
-							
-				<?php if (isset($hash['complementary_code']) && $complementaryCode = $apiResponse->getComplementaryCode($hash)): ?>
-				<tr class="even">
-					<th><?php echo $hlpr->__('Additional control'); ?></th>
-					<td><?php echo $complementaryCode; ?></td>
-				</tr>
-				<?php endif; ?>
-							
-				<?php if (isset($hash['transaction_condition']) && $transactionConditionLabel = $apiResponse->getTransactionConditionLabel($hash)): ?>
-				<tr>
-					<th><?php echo $hlpr->__('Transaction condition'); ?></th>
-					<td><?php echo $transactionConditionLabel; ?></td>
-				</tr>
-				<?php endif; ?>
-			</tbody>
-		</table>
-	</div>
+						<?php if (isset($hash['cvv_response_code']) && $cvvResponseLabel = $apiResponse->getCvvResponseLabel($hash)): ?>
+						<li><b><?php echo $hlpr->__('About CVV credit card'); ?></b> <?php echo $cvvResponseLabel; ?></li>
+						<?php endif; ?>
+									
+						<?php if (isset($hash['response_code']) && $responseLabel = $apiResponse->getResponseLabel($hash)): ?>
+						<li><b><?php echo $hlpr->__('Response code'); ?></b> <?php echo $responseLabel; ?></li>
+						<?php endif; ?>
+									
+						<?php if (isset($hash['bank_response_code']) && $bankResponseLabel = $apiResponse->getBankResponseLabel($hash)): ?>
+						<li><b><?php echo $hlpr->__('Response code of the bank'); ?></b> <?php echo $bankResponseLabel; ?></li>
+						<?php endif; ?>
+									
+						<?php if (isset($hash['complementary_code']) && $complementaryCode = $apiResponse->getComplementaryCode($hash)): ?>
+						<li><b><?php echo $hlpr->__('Additional control'); ?></b> <?php echo $complementaryCode; ?></li>
+						<?php endif; ?>
+									
+						<?php if (isset($hash['transaction_condition']) && $transactionConditionLabel = $apiResponse->getTransactionConditionLabel($hash)): ?>
+						<li><b><?php echo $hlpr->__('Transaction condition'); ?></b> <?php echo $transactionConditionLabel; ?></li>
+						<?php endif; ?>
+                	</ul>
+                </td>
+        	</tr>
+		</tbody>
+	</table>
 </div>
+<?php endif; ?>
 <?php endif; ?>
 
 <div class="divider">&nbsp;</div>

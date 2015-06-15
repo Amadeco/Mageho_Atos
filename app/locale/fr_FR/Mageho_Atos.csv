@@ -120,7 +120,7 @@
 "Pathfile %s & Parcom %s was generated with success.","Les fichiers Pathfile %s et Parcom %s ont été générés avec succès."
 "Pathfile name","Fichier Pathfile"
 "Pay","Payez"
-"Pay My Order","Régler ma commande"
+"Pay My Order","Réessayer : Régler ma commande"
 "Payment accepted by Atos","La transaction a été acceptée"
 "Payment canceled by the customer","La transaction a été annulée"
 "Payment Due Dates","Échéance de paiement"

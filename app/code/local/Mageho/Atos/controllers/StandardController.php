@@ -51,18 +51,8 @@ class Mageho_Atos_StandardController extends Mageho_Atos_Controller_Action
 		switch ($response['response_code'])
 		{
 		    case '00':
-<<<<<<< HEAD
                 if ($order->getId())  {
                     $order->addStatusHistoryComment(Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
-=======
-                if ($order->getId()) 
-                {
-					if (!$status = $this->getAtosPaymentStandard()->getConfig()->order_status_payment_accepted) {
-						$status = $order->getStatus();
-					}
-					
-                    $order->addStatusToHistory($status, Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
->>>>>>> FETCH_HEAD
                           ->save();
                 }
                 

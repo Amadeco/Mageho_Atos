@@ -19,24 +19,28 @@
  
 class Mageho_Atos_Block_Standard_Redirect extends Mage_Core_Block_Template
 {
+	protected $_model;
+	
     protected function _toHtml()
     {
-		$standard = Mage::getModel('atos/method_standard');
-		$standard->callRequest();
+		$this->_model = Mage::getModel('atos/method_standard');
+		$this->_model->callRequest();
 		
-		if ($standard->getError()) 
+		if ($this->_model->getError()) 
 		{
-		    return '<pre>'.$standard->getSystemHtml().'</pre>';
+		    return '<pre>'.$this->_model->getSystemHtml().'</pre>';
 		} else {
-			if ($paymentMeans = Mage::getSingleton('atos/session')->getAtosStandardPaymentMeans()) 
-			{
-				$this->setSelectedMethod($paymentMeans)
-					->setSystemFormUrl($standard->getSystemUrl())
-					->setSystemHtml($standard->getSystemHtml())
-					->setTemplate('mageho/atos/standard/redirect.phtml');
+			$this->setSelectedMethod(Mage::getSingleton('atos/session')->getAtosStandardPaymentMeans())
+				->setSystemFormUrl($this->_model->getSystemUrl())
+				->setSystemHtml($this->_model->getSystemHtml())
+				->setTemplate('mageho/atos/standard/redirect.phtml');
 					
-				return parent::_toHtml();
-			}
+			return parent::_toHtml();
 		}
+    }
+    
+    public function getStandardPaymentModel()
+    {
+	    return $this->_model;
     }
 }

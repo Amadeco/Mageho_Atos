@@ -22,15 +22,15 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
     protected $_code  = Mageho_Atos_Model_Config::METHOD_ATOS_SIPS_PAYMENT_SEVERAL;
     protected $_formBlockType = 'atos/several_form';
 	protected $_infoBlockType = 'atos/several_info';
-
-    /**
-     * Availability options
+	
+	/**
+     * Payment Method features
+     * @var bool
      */
     protected $_canAuthorize = true;
-    protected $_canCapture = true;
-    protected $_canUseCheckout = true;
     protected $_isInitializeNeeded = true;
     protected $_canUseForMultishipping = false;
+    protected $_canUseInternal = false;
 	
 	/**
      * Check whether payment method can be used

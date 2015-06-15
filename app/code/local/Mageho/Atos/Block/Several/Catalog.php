@@ -13,12 +13,28 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
 class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 {
+	public function getNbPayment() 
+	{
+		return Mage::helper('atos')->getNbPayment();	
+	}
+	
+	public function getSeveralPrice() 
+	{
+		$price = $this->_getFinalProductPrice() / $this->getNbPayment();
+		return Mage::helper('core')->currency($price);
+	}
+	
+	public function getCmsBlockUrl()
+	{
+		return Mage::getUrl('atos/several/information');
+	}
+	
 	protected function _prepareLayout() 
 	{
 		if ($this->isAvailable()) {
@@ -37,26 +53,9 @@ class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 		}
 	}
 	
-	public function getNbPayment() 
-	{
-		return Mage::helper('atos')->getNbPayment();	
-	}
-	
-	public function getSeveralPrice() 
-	{
-		$product = $this->getProduct();
-		$price = $product->getFinalPrice() / $this->getNbPayment();
-		return Mage::helper('core')->currency($price);
-	}
-	
-	public function getBlockUrl()
-	{
-		return Mage::getUrl('atos/several/information', array('_secure' => false));
-	}
-	
 	protected function isAvailable() 
 	{
-		$product = $this->getProduct();
+		$_product = $this->getProduct();
 		
 		$minOrderTotal = (float) Mage::getStoreConfig('atos/atoswpseveral/min_order_total');
 		$maxOrderTotal = (float) Mage::getStoreConfig('atos/atoswpseveral/max_order_total');
@@ -64,16 +63,47 @@ class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 		if (! Mage::getStoreConfigFlag('payment/atoswpseveral/active')) {
 			return false;
 		}
-		if ( isset($minOrderTotal) && $minOrderTotal > 0 && $product->getFinalPrice() < $minOrderTotal) {
+		if ($_product->isConfigurable() || $_product->hasOptions()) {
 			return false;
 		}
-		if ( isset($maxOrderTotal) && $maxOrderTotal > 0 && $product->getFinalPrice() > $maxOrderTotal) {
+		if ( isset($minOrderTotal) && $minOrderTotal > 0 && $this->_getFinalProductPrice() < $minOrderTotal) {
 			return false;
 		}
-		if ( Mage::helper('catalog')->canApplyMsrp($product) ) {
+		if ( isset($maxOrderTotal) && $maxOrderTotal > 0 && $this->_getFinalProductPrice() > $maxOrderTotal) {
+			return false;
+		}
+		if ( Mage::helper('catalog')->canApplyMsrp($_product) ) {
 			return false;
 		}
 		
 		return true;
+	}
+	
+	protected function _getFinalProductPrice()
+	{
+		$_weeeHelper = $this->helper('weee');
+		$_taxHelper  = $this->helper('tax');
+		$_product = $this->getProduct();
+		$_storeId = $_product->getStoreId();
+		$_finalPrice = $_product->getFinalPrice();
+		$_finalPriceInclTax = $_taxHelper->getPrice($_product, $_finalPrice, true);
+		
+		$_weeeTaxAmount = $_weeeHelper->getAmountForDisplay($_product);
+		
+		if ($_weeeHelper->typeOfDisplay($_product, array(Mage_Weee_Model_Tax::DISPLAY_INCL_DESCR, Mage_Weee_Model_Tax::DISPLAY_EXCL_DESCR_INCL, 4)))
+		{
+			$_weeeTaxAmount = $_weeeHelper->getAmount($_product);
+		}
+		
+		$_weeeTaxAmountInclTaxes = $_weeeTaxAmount;
+		if ($_weeeHelper->isTaxable() && !$_taxHelper->priceIncludesTax($_storeId))
+		{
+			$_attributes = $_weeeHelper->getProductWeeeAttributesForRenderer($_product, null, null, null, true);
+			$_weeeTaxAmountInclTaxes = $_weeeHelper->getAmountInclTaxes($_attributes);
+		}
+		
+		$finalProductPrice = $_finalPriceInclTax + $_weeeTaxAmountInclTaxes;
+		
+		return $finalProductPrice;
 	}
 }

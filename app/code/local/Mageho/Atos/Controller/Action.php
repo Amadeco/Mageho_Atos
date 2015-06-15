@@ -294,7 +294,8 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 			$paymentDetails = array(
 				'transaction_id' => $this->_atosResponse['transaction_id'],
 				'cc_type' => $this->_atosResponse['payment_means'],
-				'cc_trans_id' => $this->_atosResponse['transaction_id']
+				'cc_trans_id' => $this->_atosResponse['transaction_id'],
+				'additional_data' => serialize($this->_atosResponse)
 			);
 				
 			if ($ccNumber = $this->getApiResponse()->getCcNumberEnc($this->_atosResponse['card_number'])) {
@@ -315,13 +316,17 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 			switch ($this->_atosResponse['response_code']) 
 			{
 				case '00':
-			        if (!$this->_order->isCanceled() && $payment->getMethodInstance()->canAuthorize()) 
-			        {
+					if ($this->_order->isCanceled()) {
+						$this->_undoCancelOrder();
+					}
+				
+			        if ($payment->getMethodInstance()->canAuthorize()) {
 				        $payment->authorize(true, $this->_order->getBaseGrandTotal());
 				        $payment->setAmountAuthorized($this->_order->getTotalDue());
 				        
-				        if ($this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_CAPTURE ||
-				        	$this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_AUTHORIZE) {
+				        if ($this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_AUTHORIZE_CAPTURE ||
+				        	$this->_atosResponse['capture_mode'] == Mageho_Atos_Model_Config::PAYMENT_ACTION_AUTHORIZE ||
+				        	!isset($this->_atosResponse['capture_mode'])) {
 					        $this->_invoiceFlag = true;
 			            }
 			        }
@@ -374,5 +379,35 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 	        
 			return $this->_invoice->getIncrementId();
         }
+    }
+    
+    protected function _undoCancelOrder()
+    {
+	    try {
+			foreach($this->_order->getItemsCollection() as $item) {
+				if ($item->getQtyCanceled() > 0) {
+					$item->setQtyCanceled(null)
+						->setTaxCanceled(null)
+						->setHiddenTaxCanceled(null)
+						->save();
+				}
+			}
+		
+			$this->_order->setBaseDiscountCanceled(null)
+				->setBaseShippingCanceled(null)
+				->setBaseSubtotalCanceled(null)
+				->setBaseTaxCanceled(null)
+				->setBaseTotalCanceled(null)
+				->setDiscountCanceled(null)
+				->setShippingCanceled(null)
+				->setSubtotalCanceled(null)
+				->setTaxCanceled(null)
+				->setTotalCanceled(null)
+				->save();
+		}
+		catch (Mage_Core_Exception $e) {
+		}
+		catch (Exception $e) {
+		}
     }
  }

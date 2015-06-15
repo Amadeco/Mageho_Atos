@@ -14,7 +14,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 -->
@@ -68,7 +68,7 @@
             	<block type="core/text_list" name="atos.failure.extra.blocks" translate="label">
             		<label>Extra Blocks - Atos / Sips Payment Failure</label>
             		
-		            <block type="checkout/cart_sidebar" name="cart_sidebar" template="checkout/cart/sidebar.phtml" before="-">
+		            <block type="checkout/cart_sidebar" name="atos_cart" template="checkout/cart/sidebar.phtml" before="-">
 		                <action method="addItemRender"><type>simple</type><block>checkout/cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>
 		                <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/cart/sidebar/default.phtml</template></action>
 		                <action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/cart/sidebar/default.phtml</template></action>
@@ -89,7 +89,9 @@
     
 	<PRODUCT_TYPE_simple>
 		<reference name="product.info.simple.extra">
-			<block type="atos/several_catalog" name="atos.financing" template="mageho/atos/several/catalog.phtml" before="-" />
+			<block type="atos/several_catalog" name="atos.financing" before="-">
+				<action method="setTemplate" ifconfig="payment/atoswpseveral/active">mageho/atos/several/catalog.phtml</action>
+			</block>
 		</reference>
 	</PRODUCT_TYPE_simple>
 </layout>

@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
@@ -40,9 +40,14 @@ class Mageho_Atos_Block_Several_Info extends Mage_Payment_Block_Info
 	    return $this->getMethod()->getAtosSession()->getAtosSeveralPaymentMeans();
 	}
 	
+	public function isOrderPlacedFromFrontend()
+	{
+		return $this->getInfo()->getOrder()->getRemoteIp();
+	}
+	
 	public function getCreditCardImgSrc($cc = '') 
 	{
-		if (! isset($cc)) {
+		if ($cc == '') {
 			$cc = strtolower($this->getSelectedMethod());
 		}
 		return Mage::getSingleton('atos/config')->getCardIcon($cc);

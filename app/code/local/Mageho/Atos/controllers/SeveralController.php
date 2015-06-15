@@ -21,16 +21,15 @@ class Mageho_Atos_SeveralController extends Mageho_Atos_Controller_Action
 {
 	public function informationAction() 
 	{
-		$blockId = Mage::getStoreConfig('atos/atoswpseveral/cms_block');
-		
-		$blockHtml = $this->getLayout()
+		$cmsBlockId = Mage::getStoreConfig('atos/atoswpseveral/cms_block');
+		$cmsBlockHtml = $this->getLayout()
 			->createBlock('cms/block')
-			->setBlockId($blockId)
+			->setBlockId($cmsBlockId)
 			->toHtml();
 		
 		$this->getResponse()
 			->setHeader('Content-Type', 'text/html')
-			->appendBody($blockHtml);
+			->appendBody($cmsBlockHtml);
 	}
 
     public function redirectAction()
