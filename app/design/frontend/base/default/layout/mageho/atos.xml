@@ -90,7 +90,9 @@
 	<PRODUCT_TYPE_simple>
 		<reference name="product.info.simple.extra">
 			<block type="atos/several_catalog" name="atos.financing" before="-">
-				<action method="setTemplate" ifconfig="payment/atoswpseveral/active">mageho/atos/several/catalog.phtml</action>
+				<action method="setTemplate" ifconfig="payment/atoswpseveral/active">
+					<template>mageho/atos/several/catalog.phtml</template>
+				</action>
 			</block>
 		</reference>
 	</PRODUCT_TYPE_simple>
