@@ -380,7 +380,6 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 			return $this->_invoice->getIncrementId();
         }
     }
-<<<<<<< HEAD
     
     protected function _undoCancelOrder()
     {
@@ -412,6 +411,4 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 		}
     }
  }
-=======
- }
->>>>>>> origin/master
+}
