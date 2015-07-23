@@ -13,20 +13,22 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
  
 class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 {
-    /**
+    /*
      * Atos Sips Standard
      * @var string
      */
     const METHOD_ATOS_SIPS_PAYMENT_STANDARD = 'atoswps';
 	const METHOD_ATOS_SIPS_PAYMENT_SEVERAL = 'atoswpseveral';
+    const METHOD_ATOS_SIPS_PAYMENT_SPRINT = 'atoswpsprint';
+    const METHOD_ATOS_SIPS_PAYMENT_3XCB = 'atoswp3xcb';
 	
-    /**
+    /*
      * Atos Sips Standard Mode Action
      * @var string
      */
@@ -40,20 +42,20 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	 */
     const PAYMENT_ACTION_AUTHORIZE = 'VALIDATION';
 	
-	/**
+	/*
      * Current payment method code
      * @var string
      */
     protected $_methodCode = null;
 
-    /**
+    /*
      * Current store id
      *
      * @var int
      */
     protected $_storeId = null;
 	
-	/**
+	/*
      * Set method and store id, if specified
      *
      * @param array $params
@@ -70,7 +72,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 
-    /**
+    /*
      * Method code setter
      *
      * @param string|Mage_Payment_Model_Method_Abstract $method
@@ -86,7 +88,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $this;
     }
 
-    /**
+    /*
      * Payment method instance code getter
      *
      * @return string
@@ -96,7 +98,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $this->_methodCode;
     }
 
-    /**
+    /*
      * Store ID setter
      *
      * @param int $storeId
@@ -108,7 +110,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $this;
     }
 
-    /**
+    /*
      * Check whether method active in configuration and supported for merchant country or not
      *
      * @param string $method Method code
@@ -122,7 +124,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return false;
     }
 
-    /**
+    /*
      * Check whether method available for checkout or not
      * Logic based on merchant country, methods dependence
      *
@@ -144,6 +146,8 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         switch ($methodCode) {
             case self::METHOD_ATOS_SIPS_PAYMENT_STANDARD:
         	case self::METHOD_ATOS_SIPS_PAYMENT_SEVERAL:
+        	case self::METHOD_ATOS_SIPS_PAYMENT_SPRINT:
+        	case self::METHOD_ATOS_SIPS_PAYMENT_3XCB:
                 if (! $this->merchant_id || ! $this->bin_request || ! $this->bin_response) {
                     $result = false;
                 }
@@ -152,7 +156,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $result;
     }
 	
-	/**
+	/*
      * Config field magic getter
      * The specified key can be either in camelCase or under_score format
      * Tries to map specified value according to set payment method code, into the configuration value
@@ -170,7 +174,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $value;
     }
     
-    /**
+    /*
      * Mapper from Atos/Sips Standard payment actions to Magento payment actions
      *
      * @return string|null
@@ -186,7 +190,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
     
-    /**
+    /*
      * Payment actions source getter
      *
      * @return array
@@ -205,7 +209,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	    return Mage::getConfig()->getModuleDir($repertory, 'Mageho_Atos') . DS . $file;
 	}
 	
-	/**
+	/*
      * Get Atos/Sips authorized countries
      *
      * @return array
@@ -220,7 +224,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $countries;
     }
 	
-	/**
+	/*
      * Get merchant country code
      *
      * @return string
@@ -245,7 +249,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return 'fr';
     }
 	
-    /**
+    /*
      * Récupère un tableau des devises autorisées
      *
      * @return array $currencies
@@ -259,13 +263,16 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $currencies;
     }
     
-    /**
+    /*
      * Get currency code
      *
      * @return string|boolean
      */
     public function getCurrencyCode($currentCurrencyCode) 
     {
+	    if (! $currentCurrencyCode) {
+		    $currentCurrencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+	    }
         $atosConfigCurrencies = $this->getCurrencies();
 
         if (array_key_exists($currentCurrencyCode, $atosConfigCurrencies)) {
@@ -275,7 +282,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 
-    /**
+    /*
      * Récupère un tableau des langages autorisées
      *
      * @return array $languages
@@ -289,7 +296,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $languages;
 	}
 	
-	/**
+	/*
      * Get language code
      *
      * @return string
@@ -313,7 +320,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return 'fr';
     }
 
-    /**
+    /*
      * Récupère un tableau des modes de paiement autorisés
      *
      * @return array $paymentMeans
@@ -327,7 +334,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $paymentMeans;
     }
     
-     /**
+     /*
 	  * Get customer date of birth
 	  *
 	  * @return string
@@ -338,7 +345,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		return preg_replace('/-/', '', $date[0]);
 	}
 	
-    /**
+    /*
      * Récupère un tableau des mots clés du champ data 
      *
      * @return array $datafields
@@ -359,38 +366,107 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	 *
 	 *
 	 */
-	public function getDatafield($addDatafields = null)
+	public function getDatafield($fields = array())
 	{
-		$datafield = Mage::getStoreConfig($this->_getSpecificConfigPath('datafield'), $this->_storeId);
+		$datafield = array();
 		
-		if (isset($addDatafields) && !empty($addDatafields)) 
-		{
-			foreach ($addDatafields as $key => $value) {
-				$datafield.= ',' . $key . '=' . $value;
+		$datafield = array_merge(
+			$datafield,
+			explode(',', Mage::getStoreConfig($this->_getSpecificConfigPath('datafield'), $this->_storeId)),
+			$fields
+		);
+		
+		if ($paymentMeans = $this->getAtosSession()->getData(self::METHOD_ATOS_SIPS_PAYMENT_STANDARD . '_payment_means')) {
+			switch ($paymentMeans) {
+				/* Donnée spécifique Aurore: Date de naissance */
+				case 'AURORE':
+					if ($dob = $this->_getCustomerDob()) {
+						$datafield['DATE_NAISSANCE'] = $dob;
+					}
+					$datafield['MODE_REGLEMENT'] = 'MR_CREDIT';
+					break;
+					
+				/* 
+				 * Donnée spécifique PayPal: Le numéro de commande PayPal
+				 * PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques
+				 */
+				case 'PAYPAL':
+					if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) {
+						$datafield['PP_INVOICEID'] = $orderId;
+					}
+					break;
 			}
 		}
 		
-		switch ($this->getAtosSession()->getAtosStandardPaymentMeans())
+		/*
+		 *
+		 * Sogenactif solutions
+		 * Société générale
+		 * Sprint Secure & 3XCB
+		 *
+		 */
+		if ($this->getMethodCode() == self::METHOD_ATOS_SIPS_PAYMENT_SPRINT ||
+			$this->getMethodCode() == self::METHOD_ATOS_SIPS_PAYMENT_3XCB) 
 		{
-			/* Donnée spécifique Aurore: Date de naissance */
-			case 'AURORE':
-				if ($dob = $this->_getCustomerDob()) {
-					$datafield.= ',DATE_NAISSANCE=' . $dob;
-				}
-				$datafield.= ',MODE_REGLEMENT=MR_CREDIT';
-				break;
+			$billing = $this->_getOrder()->getBillingAddress();
+
+	        $telephone = $billing->getTelephone();
+	        if (strlen($telephone) > 10) {
+	            $telephone = str_replace(array('.', ' ', '-'), '', $telephone);
+	        }
+	        
+	        $fax = $billing->getFax();
+	        if (strlen($fax) > 10) {
+	            $fax = str_replace(array('.', ' ', '-'), '', $fax);
+	        }
+
+			if ($this->getMethodCode() == self::METHOD_ATOS_SIPS_PAYMENT_SPRINT) {
+				$sprint  = Mage::getSingleton('atos/method_sprint');
 				
-			/* Donnée spécifique PayPal: Le numéro de commande PayPal */
-			case 'PAYPAL':
-				if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) {
-					/* PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques */
-					$datafield.= ',PP_INVOICEID=' . $orderId;
-				}
-				break;
+	        	$datakey = 'SOLUTIONSPRINTSECURE_DATA';
+	        	
+				$data = '#' . substr(trim($sprint->getConfigData('authentication_chain')), 0, 512) . '#';
+				$data.= substr(trim($sprint->getConfigData('style_route')), 0, 5) . '######';
+				$data.= substr(trim($sprint->getConfigData('pre_capture_bin')), 0, 6) . '#';
+	        }
+	        
+	        if ($this->getMethodCode() == self::METHOD_ATOS_SIPS_PAYMENT_3XCB) {
+				$ff3xcb = Mage::getSingleton('atos/method_3xcb');
+				
+				$datakey = '3XCBFRANFINANCE_DATA';
+				
+				$data = '#' . substr(trim($ff3xcb->getConfigData('authentication_chain')), 0, 512) . '#';
+				$data.= substr(trim($ff3xcb->getConfigData('style_route')), 0, 5) . '####';
+				$data.= substr(trim($ff3xcb->getConfigData('timer')), 0, 3) . '##';
+				$data.= substr(trim($sprint->getConfigData('pre_capture_bin')), 0, 6) . '#';
+			}
+	        
+	        // Doit etre sous la forme => Mr, Mme, Mle
+	        //$data .= substr(trim($billing->getPrefix()), 0, 3) . '#';
+	        $data .= '#';
+	        
+	        $data .= substr(trim($billing->getLastname()), 0, 24) . '##';
+	        $data .= substr(trim($billing->getFirstname()), 0, 15) . '#####';
+	        $data .= substr(trim($billing->getStreet1()), 0, 32) . '#';
+	        
+	        if ($billing->getStreet2()) {
+	        	$data .= substr(trim($billing->getStreet2()), 0, 32) . '#';
+	        } else {
+	        	$data .= '#';
+	        }
+	        
+	        $data .= substr(trim($billing->getPostcode()), 0, 5) . '#';
+	        $data .= substr(trim($billing->getCity()), 0, 26) . '#';
+	        $data .= substr(trim($telephone), 0, 10) . '#';
+	        $data .= substr(trim($fax), 0, 10) . '#';
+			
+			$datafield[$datakey] = $data;
 		}
 		
 		/*
+		 *
 		 * 3D Secure Bypass
+		 *
 		 */
 		if ($this->getConfig()->bypass_enabled) 
 		{
@@ -403,17 +479,17 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 				$object = new Varien_Object(array('quote' => $this->_getQuote()));
 				
 				if ($rule->validate($object)) {
-					$datafield.= ',3D_BYPASS';
+					$datafield['3D_BYPASS'] = true;
 				}
 			}
 		}
 		
 		if ( ! empty($datafield) ) {
-			return sprintf(' data=%s', str_replace(',', '\;', $datafield));
+			return sprintf(' data="%s;"', implode(';', array_map(function ($v, $k) { return (strlen($k) > 2 ? $k . '=' : '') . $v; }, $datafield, array_keys($datafield))));
 		}
 	}
 	
-	/**
+	/*
      * Get relative credit card image file path
      *
      * @return string
@@ -428,32 +504,32 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 			switch ($type) {
 				case 'amex':
 					return $url . 'AMEX.gif';
-				break;
+					break;
 				case 'aurore':
 					return $url . 'AURORE.gif';
-				break;
+					break;
 				case 'cb':
 					return $url . 'CB.gif';
-				break;
+					break;
 				case 'mastercard':
 					return $url . 'MASTERCARD.gif';
-				break;
+					break;
 				case 'visa':
 					return $url . 'VISA.gif';	
-				break;
+					break;
 				case 'paylib':
 					return $url . 'PAYLIB.gif';
-				break;
+					break;
 				case 'paypal':
 					return $url . 'PAYPAL.gif';
-				break;
+					break;
 			}
 		} else {
 			return $url . $file;
 		}
     }
     
-    /**
+    /*
      * Get relative icon file path
      *
      * @return string
@@ -464,14 +540,14 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		$url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'atos'. DS ;
 		$file = $this->icon;
 		
-		if (! isset($file) && empty($file) || isset($file) && ! file_exists($path . $file)) {
+		if (!isset($file) || empty($file) || isset($file) && ! file_exists($path . $file)) {
 			return false;
 		} else {
 			return $url . $file;
 		}
     }
     
-    /**
+    /*
      * Get authorized IPs
      *
      * @return array
@@ -495,7 +571,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return false;
     }
 	
-	/**
+	/*
      * Map any supported payment method into a config path by specified field name
      *
      * @param string $fieldName
@@ -511,6 +587,12 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 			case self::METHOD_ATOS_SIPS_PAYMENT_SEVERAL:
                 $path = $this->_mapSeveralFieldset($fieldName);
                 break;
+            case self::METHOD_ATOS_SIPS_PAYMENT_SPRINT:
+                $path = $this->_mapSprintFieldset($fieldName);
+            	break;
+            case self::METHOD_ATOS_SIPS_PAYMENT_3XCB:
+                $path = $this->_map3xcbFieldset($fieldName);
+            	break;
         }
         if ($path === null) {
             $path = $this->_mapConfigurationFieldset($fieldName);
@@ -527,7 +609,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         return $path;
     }
 	
-	/**
+	/*
      * Map Website Atos Payment Standard Settings
      *
      * @param string $fieldName
@@ -559,7 +641,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 	
-	/**
+	/*
      * Map Website Atos Payment Several Settings
      *
      * @param string $fieldName
@@ -589,8 +671,71 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 				return null;
         }
     }
+    
+    /*
+     * Map Website Atos Payment Sprint Secure Franfinance Settings
+     *
+     * @param string $fieldName
+     * @return string|null
+     */
+    protected function _mapSprintFieldset($fieldName)
+    {
+        if (!$this->_methodCode) {
+            return null;
+        }
+        switch ($fieldName)
+        {
+            case 'title':
+			case 'sort_order':
+			case 'icon':
+			case 'authentication_chain':
+			case 'style_route':
+			case 'pre_capture_bin':
+            case 'allowspecific':
+            case 'specificcountry':
+            case 'min_order_total':
+            case 'max_order_total':
+                return "atos/{$this->_methodCode}/{$fieldName}";
+        	case 'active':
+        		return "payment/{$this->_methodCode}/{$fieldName}";
+			default:
+				return null;
+        }
+    }
+    
+    /*
+     * Map Website Atos Payment 3xCB Franfinance Settings
+     *
+     * @param string $fieldName
+     * @return string|null
+     */
+    protected function _map3xcbFieldset($fieldName)
+    {
+        if (!$this->_methodCode) {
+            return null;
+        }
+        switch ($fieldName)
+        {
+            case 'title':
+			case 'sort_order':
+			case 'icon':
+			case 'authentication_chain':
+			case 'style_route':
+			case 'timer':
+			case 'pre_capture_bin':
+            case 'allowspecific':
+            case 'specificcountry':
+            case 'min_order_total':
+            case 'max_order_total':
+                return "atos/{$this->_methodCode}/{$fieldName}";
+        	case 'active':
+        		return "payment/{$this->_methodCode}/{$fieldName}";
+			default:
+				return null;
+        }
+    }
 	
-	/**
+	/*
      * Map Configuration Atos Settings
      *
      * @param string $fieldName
@@ -607,7 +752,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 	
-	/**
+	/*
      * Map Integration Settings
      *
      * @param string $fieldName
@@ -629,7 +774,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 	
-	/**
+	/*
      * Map SecureCode Settings
      *
      * @param string $fieldName
@@ -647,7 +792,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         }
     }
 	
-	/**
+	/*
      * Map Security Enhancement During Response Return
      *
      * @param string $fieldName

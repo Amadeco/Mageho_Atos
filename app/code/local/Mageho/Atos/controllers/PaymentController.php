@@ -16,46 +16,16 @@
  * @copyright   Copyright (c) 2015 Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
- 
-class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
+
+class Mageho_Atos_PaymentController extends Mage_Core_Controller_Front_Action
 {
-    protected $_api = null;
-    protected $_config = null;
-    protected $_invoice = null;
+    protected $_api;
+    protected $_config;
+    protected $_invoice;
     protected $_invoiceFlag = false;
-    protected $_order = null;
-    protected $_atosResponse = null;
-	
-	/*
-	 * Get checkout session
-	 *
-	 * @return Mage_Checkout_Model_Session
-	 */
-	public function getCheckoutSession()
-	{
-	    return Mage::getSingleton('checkout/session');	
-	}
+    protected $_order;
+    protected $_atosResponse;
 
-    /**
-     * Retrieve shopping cart model object
-     *
-     * @return Mage_Checkout_Model_Cart
-     */
-    public function getCart()
-    {
-        return Mage::getSingleton('checkout/cart');
-    }
-
-   /*
-	* Get customer session
-	*
-	* @return Mage_Customer_Model_Session
-	*/
-    public function getCustomerSession()
-    {
-        return Mage::getSingleton('customer/session');
-    }
-    
    /*
 	* Get Atos/Sips Standard config
 	*
@@ -86,24 +56,275 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
         return Mage::getSingleton('atos/api_response');
     }
     
-	/*
-     * Get singleton with Atos standard
+    /**
+     * Retrieve shopping cart model object
      *
-     * @return object Mageho_Atos_Model_Method_Standard
+     * @return Mage_Checkout_Model_Cart
      */
-    public function getAtosPaymentStandard()
+    public function getCart()
     {
-        return Mage::getSingleton('atos/method_standard');
+        return Mage::getSingleton('checkout/cart');
     }
     
-    /**
-     * Get singleton with Atos several
-     *
-     * @return object Mageho_Atos_Model_Method_Several
-     */
-    public function getAtosPaymentSeveral()
+	/*
+	 * Get checkout session
+	 *
+	 * @return Mage_Checkout_Model_Session
+	 */
+	public function getCheckoutSession()
+	{
+	    return Mage::getSingleton('checkout/session');	
+	}
+
+   /*
+	* Get customer session
+	*
+	* @return Mage_Customer_Model_Session
+	*/
+    public function getCustomerSession()
     {
-        return Mage::getSingleton('atos/method_several');
+        return Mage::getSingleton('customer/session');
+    }
+    
+    public function redirectAction()
+    {
+    	$this->getAtosSession()->setData('quote_id', $this->getCheckoutSession()->getLastQuoteId());
+        $this->loadLayout();
+        
+		Mage::dispatchEvent($this->getMethodInstance()->getCode() . '_redirect_action', array(
+			'atos_session' => $this->getAtosSession(),
+			'checkout_session' => $this->getCheckoutSession(), 
+			'request' => $this->getRequest(),
+			'layout' => $this->getLayout()
+		));
+		
+		$this->renderLayout();
+		
+        $this->getCheckoutSession()->unsetData('quote_id');
+        $this->getCheckoutSession()->unsetData('redirect_url');
+    }
+
+	public function normalAction() 
+	{
+        $this->processIpnResponse($_REQUEST);
+		
+		$atosApiResponse = $this->getApiResponse();
+		$response = $this->getAtosResponse();
+		
+		$order = Mage::getModel('sales/order');
+		if ($response['order_id']) {
+			$order->loadByIncrementId($response['order_id']);
+		}
+		
+		switch ($response['response_code'])
+		{
+		    case '00':
+                if ($order->getId())  {
+                    $order->addStatusHistoryComment(Mage::helper('atos')->__('Customer returned successfully from payment platform.'))
+                          ->save();
+                }
+                
+				$this->getAtosSession()->unsetData($this->getMethodInstance()->getCode() . '_payment_means');
+				
+				$this->getCheckoutSession()->getQuote()->setIsActive(false)->save();
+				
+				// Set redirect URL
+                $response['redirect_url'] = 'checkout/onepage/success';
+			    break;
+			    
+			default:
+				$error = $atosApiResponse->getResponseLabel($response);
+						
+				switch ($response['cvv_response_code']) 
+				{
+					case '4E':
+					case '': // specific cvv_response_code for AMEX and FINAREF credit card
+						$error.= ' - '  . $atosApiResponse->getCvvResponseLabel($response);
+						break;
+					default:
+						$error.= ' - '  . $atosApiResponse->getBankResponseLabel($response);
+						break;
+				}
+						 
+				$this->getAtosSession()->setRedirectMessage($error);
+				
+                // Set redirect URL
+				if ($this->getConfig()->redirect) {
+					$response['redirect_url'] = '*/*/failure';
+				} else {
+		        	$response['redirect_url'] = 'checkout/cart';
+				}
+				break;
+		}
+				
+		Mage::dispatchEvent($this->getMethodInstance()->getCode() . '_controller_normal_action', array(
+			'atos_response' => $response,
+			'atos_session' => $this->getAtosSession(),
+			'checkout_session' => $this->getCheckoutSession(),
+			'order' => $order->getId() ? $order : NULL,
+			'request' => $this->getRequest()
+		));
+		
+        $this->_redirect($response['redirect_url'], array('_secure' => true));
+	}
+	
+	public function automaticAction() 
+	{
+		$this->processIpnResponse($_REQUEST);
+		
+		if ($this->getConfig()->log_ip_address) {
+			Mage::getSingleton('atos/debug')->logRemoteAddr();
+		}
+			
+        if ($this->getConfig()->check_ip_address) {
+			$remoteAddr = Mage::helper('core/http')->getRemoteAddr(false);
+			$allowedIp = $this->getConfig()->getAllowedIp();
+			
+			if (count($allowedIp))
+			{ 
+				if (! $this->_isAuthorizedIp($remoteAddr, $allowedIp))
+				{
+			        Mage::getSingleton('atos/debug')->debugData(
+			        	Mage::helper('atos')->__('%s tries to connect to your server (Authorized Ips : %s).', 
+			        		$remoteAddr,
+			        		implode(', ', $allowedIp)
+			        	)
+			        );
+			        
+		            Mage::app()->getResponse()
+		                ->setHeader('HTTP/1.1', '503 Service Unavailable')
+		                ->sendResponse();
+		            exit;
+	            }
+      	    } else {
+	      	    Mage::getSingleton('atos/debug')->debugData(
+	      	    	Mage::helper('atos')->__('You have enabled the verification of the IP address of the server payment but no IP address has been entered.')
+	      	    );
+      	    }
+        }
+        
+		$order = Mage::getModel('sales/order')->loadByIncrementId($this->getAtosResponse('order_id'));
+		if ($order->getId()) {
+			// Update state and status order
+			$this->_processOrder($order);
+		}
+	}
+	
+	public function cancelAction()
+	{
+		$this->processIpnResponse($_REQUEST);
+		
+		$atosApiResponse = $this->getApiResponse();
+		$response = $this->getAtosResponse();
+		
+		// Set redirect URL
+		if ($this->getConfig()->redirect) {
+			$response['redirect_url'] = '*/*/failure';
+		} else {
+        	$response['redirect_url'] = 'checkout/cart';
+		}
+		
+		$error = $atosApiResponse->getResponseLabel($response);
+		
+		switch ($response['response_code']) 
+		{
+			case '17':
+				$error.= Mage::helper('atos')->__('Choose an another payment method or contact us by phone at %s to validate your order.', Mage::getStoreConfig('general/store_information/phone'));
+					
+				$this->getAtosSession()
+					->setRedirectTitle(Mage::helper('atos')->__('Payment has been canceled with success.'))
+					->setRedirectMessage($error);
+					
+				break;
+			default:
+				switch ($response['cvv_response_code']) 
+				{
+					case '4E':
+					case '': // specific cvv_response_code for AMEX and FINAREF credit card
+						$error.= ' - '  . $atosApiResponse->getCvvResponseLabel($response);
+						break;
+					default:
+						$error.= ' - '  . $atosApiResponse->getBankResponseLabel($response);
+						break;
+				}
+								 
+				$this->getAtosSession()
+					->setRedirectTitle(Mage::helper('atos')->__('Your order has been refused'))
+					->setRedirectMessage($error);
+						
+				break;
+		}
+		
+		$order = Mage::getModel('sales/order');
+		if ($response['order_id']) 
+		{
+			$order->loadByIncrementId($response['order_id'])
+				->cancel()
+				->addStatusHistoryComment($error)
+				->save();
+			
+	    	$cart = $this->getCart();
+	    	if (! $cart->getQuote()->getItemsCount()) {
+				Mage::helper('atos')->reorder($order);
+			}
+		}
+		
+		Mage::dispatchEvent($this->getMethodInstance()->getCode() . '_cancel', array(
+			'atos_response' => $response,
+			'atos_session' => $this->getAtosSession(),
+			'checkout_session' => $this->getCheckoutSession(),
+			'order' => $order->getId() ? $order : NULL,
+			'request' => $this->getRequest()
+		));
+		
+		$this->_redirect($response['redirect_url'], array('_secure' => true));
+	}
+	
+	/*
+	 * When has error in treatment
+	 */
+    public function failureAction()
+    {
+    	$cart = $this->getCart();
+    	if (! $cart->getQuote()->getItemsCount()) {
+    		$this->_redirect('/');
+    		return;
+        }
+    
+        $this->loadLayout();
+        $this->_initLayoutMessages('checkout/session');
+        $this->_initLayoutMessages('catalog/session');
+
+        $paymentMeans = $this->getAtosSession()->getData($this->getMethodInstance()->getCode() . '_payment_means');
+        
+   		// Set redirect URL
+        $response = array(
+        	'redirect_url' => 'checkout/cart',
+        	'button_url' => Mage::getUrl('*/*/redirect', array('_secure' => true)),
+        	'button_text' => Mage::helper('atos')->__('Pay My Order')
+        );
+        
+   		Mage::dispatchEvent($this->getMethodInstance()->getCode() . '_failure', array(
+	   		'atos_response' => $response,
+			'atos_session' => $this->getAtosSession(),
+			'checkout_session' => $this->getCheckoutSession(),
+		));
+        
+        if ($blockAtosPaymentFailure = $this->getLayout()->getBlock('atos.payment.failure')) {
+	        $blockAtosPaymentFailure->setTitle($this->getAtosSession()->getRedirectTitle())
+	        	->setMessage($this->getAtosSession()->getRedirectMessage())
+	        	->setButtonUrl($response['button_url'])
+	        	->setButtonText($response['button_text']);
+        }
+		
+		if (! $this->getConfig()->redirect) {
+        	$this->_redirect($response['redirect_url'], array('_secure' => true));
+        }
+        
+        $this->getAtosSession()->unsetAll();
+        $this->getAtosSession()->setData($this->getMethodInstance()->getCode() . '_payment_means', $paymentMeans);
+        
+        $this->renderLayout();
     }
     	
 	/**
@@ -113,7 +334,7 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
     public function processIpnResponse($request)
     {
     	if (! isset($request['DATA'])) {
-	    	Mage::getSingleton('atos/debug')->log(
+	    	Mage::getSingleton('atos/debug')->debugData(
 	    		Mage::helper('atos')->__('An error occured: var $request has no data.')
 	    	);
             
@@ -130,7 +351,7 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
         $this->_atosResponse = $this->getApiResponse()->doResponse($request['DATA']);
     
 		if ($this->_atosResponse['merchant_id'] != $this->getConfig()->merchant_id) {
-			Mage::getSingleton('atos/debug')->log(
+			Mage::getSingleton('atos/debug')->debugData(
 				Mage::helper('atos')->__("Configuration merchant id (%s) doesn't match merchant id (%s)", 
 					$this->getConfig()->merchant_id, 
 					$this->_atosResponse['merchant_id']
@@ -148,7 +369,7 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 		}
 	
 	    if ($this->_atosResponse['code'] == '-1') {
-	    	Mage::getSingleton('atos/debug')->log(
+	    	Mage::getSingleton('atos/debug')->debugData(
 	    		Mage::helper('atos')->__("An error occured: error code %s", $this->_atosResponse['code'])
 	    	);
 			
@@ -164,21 +385,6 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 
 		return $this;
     }
-
-	public function getAtosResponse($key = null) 
-	{
-		if ($key != null) {
-			if (isset($this->_atosResponse[$key])) {
-				return $this->_atosResponse[$key];
-			}
-		}
-		return $this->_atosResponse;
-	}
-	
-	public function hasAtosResponse() 
-	{
-		return (bool) !empty($this->_atosResponse) && count($this->_atosResponse);	
-	}
 	
     /**
      * Load order
@@ -190,7 +396,7 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
         if (empty($this->_order)) {
             // Check order ID existence
             if (!array_key_exists('order_id', $this->_atosResponse)) {
-                Mage::getSingleton('atos/debug')->log(
+                Mage::getSingleton('atos/debug')->debugData(
                 	Mage::helper('atos')->__('No order Id found in response data.')
                 );
                 
@@ -203,7 +409,7 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
             $orderId = $this->_atosResponse['order_id'];
             $this->_order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
             if (!$this->_order->getId()) {
-                Mage::getSingleton('atos/debug')->log(
+                Mage::getSingleton('atos/debug')->debugData(
                 	Mage::helper('atos')->__('Wrong order Id: "%s".', $orderId)
                 );
                 
@@ -380,7 +586,6 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 			return $this->_invoice->getIncrementId();
         }
     }
-<<<<<<< HEAD
     
     protected function _undoCancelOrder()
     {
@@ -411,7 +616,31 @@ class Mageho_Atos_Controller_Action extends Mage_Core_Controller_Front_Action
 		catch (Exception $e) {
 		}
     }
- }
-=======
- }
->>>>>>> origin/master
+
+	public function getAtosResponse($key = null) 
+	{
+		if ($key != null) {
+			if (isset($this->_atosResponse[$key])) {
+				return $this->_atosResponse[$key];
+			}
+		}
+		return $this->_atosResponse;
+	}
+	
+	public function hasAtosResponse() 
+	{
+		return (bool) !empty($this->_atosResponse) && count($this->_atosResponse);	
+	}
+	
+    protected function _isAuthorizedIp($remoteAddr, $authorizedRemoteAddr) 
+	{
+		$checked = false;
+        foreach ($authorizedRemoteAddr as $ip) {
+        	if ($remoteAddr == trim($ip)) {
+            	$checked = true;
+                break;
+            }
+        }
+        return $checked;
+    }
+}

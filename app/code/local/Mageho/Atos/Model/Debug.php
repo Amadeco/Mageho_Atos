@@ -13,36 +13,22 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
 class Mageho_Atos_Model_Debug extends Mageho_Atos_Model_Abstract
-{	
-	const LOG_FILE = 'atos.log';
-
-	public function getRequestCmd()
+{
+	public function debugData($data)
 	{
-		return $this->getAtosSession()->getRequestCmd();
-	}
-	
-	public function log($message, $type = Zend_Log::ERR)
-	{
-		Mage::log($message, $type, self::LOG_FILE);
-	}
-	
-	public function logRemoteAddr()
-	{
-		$remoteAddr = Mage::helper('core/http')->getRemoteAddr(false);
-		$message = Mage::helper('atos')->__('IP registered from automatic response : %s', $remoteAddr);
-		self::log($message, Zend_Log::INFO);
+		//$this->debugData($data);
+		Mage::log($data);
 	}
 	
 	public function debugFile($file) 
 	{
-		$path = Mage::getSingleton('atos/api_files')->getLibDir();
-		
 		if (strpos($file, '.') !== false) {
+			$path = Mage::getSingleton('atos/api_files')->getLibDir();
 			$data = explode('.', $file);
 			
 			switch ($data[0]) {
@@ -71,7 +57,20 @@ class Mageho_Atos_Model_Debug extends Mageho_Atos_Model_Abstract
 					break;
 			}
 		}
-		
 		return false;
+	}
+	
+	public function getRequestCmd()
+	{
+		return $this->getAtosSession()->getRequestCmd();
+	}
+	
+	public function logRemoteAddr()
+	{
+		$remoteAddr = Mage::helper('core/http')->getRemoteAddr(false);
+
+		$this->debugData(
+			Mage::helper('atos')->__('IP registered from automatic response : %s', $remoteAddr)
+		);
 	}
 }

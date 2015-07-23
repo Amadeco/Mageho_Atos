@@ -10,13 +10,15 @@
  * If you are unable to obtain it through the world-wide-web, please send an email
  * to modules@quadra-informatique.fr so we can send you a copy immediately.
  *
- * @author Quadra Informatique <modules@quadra-informatique.fr>
- * @copyright 1997-2015 Quadra Informatique
- * @license http://www.opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ * @category     Mageho
+ * @package     Mageho_Atos
+ * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
+ * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
+ 
 abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
 {
-
     protected $_response = null;
     protected $_html = null;
     protected $_error = false;
@@ -26,7 +28,6 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
      * @var Mageho_Atos_Model_Config
      */
     protected $_config;
-    
     protected $_order;
     protected $_quote;
 
@@ -169,11 +170,9 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
             $data = new Varien_Object($data);
         }
 		
-		if ($data->getAtosStandardPaymentMeans()) {
-	        $this->getAtosSession()->setAtosStandardPaymentMeans($data->getAtosStandardPaymentMeans());
-		}
-		if ($data->getAtosSeveralPaymentMeans()) {
-	        $this->getAtosSession()->setAtosSeveralPaymentMeans($data->getAtosSeveralPaymentMeans());
+		$key = $this->getCode() . '_payment_means';
+		if ($data->getData($key)) {
+			$this->getAtosSession()->setData($key, $data->getData($key));
 		}
 		
 		if ($data->getAuroreDob()) {
@@ -197,11 +196,31 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
     /**
      * Get Atos API Request Model
      *
-     * @return Quadra_Atos_Model_Api_Request
+     * @return Mageho_Atos_Model_Api_Request
      */
     public function getApiRequest()
     {
         return Mage::getSingleton('atos/api_request');
+    }
+
+    /**
+     * Get Atos API Response Model
+     *
+     * @return Mageho_Atos_Model_Api_Response
+     */
+    public function getApiResponse()
+    {
+        return Mage::getSingleton('atos/api_response');
+    }
+
+    /**
+     * Get Atos API Parameters Model
+     *
+     * @return Mageho_Atos_Model_Api_Parameters
+     */
+    public function getApiParameters()
+    {
+        return Mage::getSingleton('atos/api_parameters');
     }
 
     /**
@@ -297,6 +316,9 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
     protected function _getCustomerIpAddress()
     {
         $ip = $this->_getQuote()->getRemoteIp();
+        if (! $ip) {
+	        $ip = Mage::helper('core/http')->getRemoteAddr();
+        }
         
         # Determine originating IP address. REMOTE_ADDR is the standard
         # but will fail if the user is behind a proxy. HTTP_CLIENT_IP and/or
@@ -333,16 +355,5 @@ abstract class Mageho_Atos_Model_Method_Abstract extends Mage_Payment_Model_Meth
     protected function _getOrderId()
     {
         return $this->_getOrder()->getIncrementId();
-    }
-
-    public function debugRequest($data)
-    {
-        $this->debugData(array('type' => 'request', 'parameters' => $data));
-    }
-
-    public function debugResponse($data, $from = '')
-    {
-        ksort($data);
-        $this->debugData(array('type' => "{$from} response", 'parameters' => $data));
     }
 }

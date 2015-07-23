@@ -1,0 +1,33 @@
+
+#########################################################################
+#
+# Pathfile
+#
+# Liste fichiers paramètres utilisés par le module de paiement
+#
+#########################################################################
+# ------------------------------------------------------------------------
+# Chemin vers le répertoire des images
+# ------------------------------------------------------------------------
+D_LOGO!http://www.mageho.com/media/atos/!
+
+
+#------------------------------------------------------------------------
+#  Fichiers paramètres liés
+#------------------------------------------------------------------------
+
+
+# Certificat du commercant
+F_CERTIFICATE!/var/www/vhosts/mageho.com/httpdocs/lib/atos/certif!
+
+
+# Fichier paramètre commercant
+F_PARAM!/var/www/vhosts/mageho.com/httpdocs/lib/atos/parmcom!
+
+
+# Fichier des paramètres communs
+F_DEFAULT!/var/www/vhosts/mageho.com/httpdocs/lib/atos/pathfile.045197412500028!
+
+# --------------------------------------------------------------------------
+# Fin du ficher
+# --------------------------------------------------------------------------

@@ -37,6 +37,8 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 			if (strstr(ini_get('disable_functions'), 'shell_exec')) {
 	            throw new Exception('Forbidden `shell_exec` command.');
 	        }
+		
+			Mage::log($this->getRequest());
 	
 	        if (! $sipsResult = shell_exec("{$this->getRequest()} &2>1")) {
 	            throw new Exception('No result from binary file.');
@@ -66,8 +68,11 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 					'command' => $this->getRequest()
 				), 'atos', false
 			);
+			
+			Mage::log($debug);
 
 			if (! isset($code)) {
+				Mage::getSingleton('atos/debug')->log($this->getDebug());
 				throw new Exception($debug);
 			}
 			
@@ -82,14 +87,17 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 				throw new Exception($debug);
 			}
 			
-			$this->setError(false);
-			$this->setUrl($regs[1][0]);
-			$this->setHtml($regs[2][0]);
+			$this->setError(false)
+				->setUrl($regs[1][0])
+				->setHtml($regs[2][0]);
+			
 		} catch (Exception $e) {
-			$this->setError(true);
-			$this->setDebug($e->getMessage());
-			Mage::getSingleton('atos/debug')->log($this->getDebug());
-			Mage::helper('checkout')->sendPaymentFailedEmail($this->_getQuote(), $this->getDebug());
+			
+			$this->setError(true)
+				->setDebug($e->getMessage());
+			
+			Mage::getSingleton('atos/debug')->debugData($this->getDebug());
+			//Mage::helper('checkout')->sendPaymentFailedEmail($this->_getQuote(), $this->getDebug());
 		}
     }
 	
@@ -101,20 +109,24 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 	*/
 	public function build($params) 
 	{
-		
 		$request = $this->getConfig()->bin_request;
 		$request.= ' pathfile=' . $this->getApiFiles()->getPathfileName();
 		$request.= ' language=' . $this->getConfig()->getLanguageCode();
 		$request.= ' merchant_id=' . $this->getConfig()->merchant_id;
 		$request.= ' merchant_country=' . $this->getConfig()->getMerchantCountry();
 		$request.= ' amount=' . $params['amount'];
+        $request.= ' payment_means=' . $params['payment_means'];
 		$request.= ' currency_code=' . $params['currency_code'];
 		$request.= ' normal_return_url=' . str_replace('?___SID=U', '', $params['normal_return_url']);
 		$request.= ' cancel_return_url=' . str_replace('?___SID=U', '', $params['cancel_return_url']);
 		$request.= ' automatic_response_url=' . str_replace('?___SID=U', '', $params['automatic_response_url']);
 		$request.= ' customer_id=' . $params['customer_id'];
 		$request.= ' customer_email=' . $params['customer_email'];
-		$request.= ' customer_ip_address=' . $params['customer_ip_address'];
+		
+		// Error parameter (customer_ip_address= ......) too long
+		//$request.= ' customer_ip_address=' . $params['customer_ip_address'];
+		$request.= ' customer_ip_address=' . substr($params['customer_ip_address'], 0, 19);
+		
 		$request.= ' order_id=' . $params['order_id'];
 		
 		if (! $this->getConfig()->isTestMode())
@@ -136,10 +148,19 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 	        }
 	    }
 		
-		/* Save command line in atos session for debug purpose */
-		Mage::getSingleton('atos/debug')->log($request);
-		Mage::getSingleton('atos/session')->setRequestCmd($request);
 		$this->setRequest($request);
+		Mage::getSingleton('atos/session')->setRequestCmd($request);
+	}
+	
+	public function setRequest($request)
+	{
+		$this->_request = $request;
+		return $this;
+	}
+	
+	public function getRequest()
+	{
+		return $this->_request;
 	}
 	
 	public function setUrl($url)
@@ -164,9 +185,9 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 		return $this->_html;
 	}
 	
-	public function setError($bool)
+	public function setError($error)
 	{
-		$this->_error = $bool;
+		$this->_error = $error;
 		return $this;
 	}
 	
@@ -184,16 +205,5 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 	public function getDebug()
 	{
 		return $this->_debug;
-	}
-	
-	public function setRequest($request)
-	{
-		$this->_request = $request;
-		return $this;
-	}
-	
-	public function getRequest()
-	{
-		return $this->_request;
 	}
 }

@@ -57,7 +57,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
 			'customer_id' => $this->_getCustomerId(),
 			'customer_email' => $this->_getCustomerEmail(),
 			'customer_ip_address' => $this->_getCustomerIpAddress(),
-			'payment_means' => $this->getPaymentMeans(),
+			'payment_means' => implode(',2,', $this->getPaymentMeans()) . ',2',
 			'normal_return_url' => $this->_getNormalReturnUrl(),
 			'cancel_return_url' => $this->_getCancelReturnUrl(),
 			'automatic_response_url' => $this->_getAutomaticResponseUrl(),
@@ -72,10 +72,6 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
         if ($request->getError()) {
 			$this->_error = true;
 	        $this->_html = $request->getDebug();
-			
-			if ($this->getDebug()->getRequestCmd()) {
-				$this->_html.= "\n\n" . $this->getDebug()->getRequestCmd();
-			}
 		} else {
 			$this->_error = false;
 	        $this->_url = $request->getUrl();
@@ -105,7 +101,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
      */
     protected function _getNormalReturnUrl()
     {
-        return Mage::getUrl('atos/standard/normal', array('_secure' => true));
+        return Mage::getUrl('atos/payment_standard/normal', array('_secure' => true));
     }
     
     /**
@@ -115,7 +111,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
      */
     protected function _getCancelReturnUrl()
     {
-        return Mage::getUrl('atos/standard/cancel', array('_secure' => true));
+        return Mage::getUrl('atos/payment_standard/cancel', array('_secure' => true));
     }
     
     /**
@@ -125,7 +121,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
      */
     protected function _getAutomaticResponseUrl()
     {
-        return Mage::getUrl('atos/automatic/index', array('_secure' => true));
+        return Mage::getUrl('atos/payment_standard/automatic', array('_secure' => true));
     }
     
     /**
@@ -135,7 +131,7 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
      */
     public function getOrderPlaceRedirectUrl()
     {
-        return Mage::getUrl('atos/standard/redirect', array('_secure' => true));
+        return Mage::getUrl('atos/payment_standard/redirect', array('_secure' => true));
     }
     
     /**

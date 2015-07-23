@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 ?>
@@ -54,13 +54,13 @@
 Event.observe(window, 'load', function() {
     var pConfig = new AtosConfig;
 	
-    ['atoswps', 'atoswpseveral'].each(function(m) {
+    ['atoswps', 'atoswpseveral', 'atoswpsprint', 'atoswp3xcb'].each(function(m) {
         Element.observe(pConfig.getMethodSwitcher(m).id, 'click', pConfig.trackMethod.bind(pConfig, m));
     });
 	
     pConfig.fastMode = true;
 
-    ['atoswps', 'atoswpseveral'].each(function(m) {
+    ['atoswps', 'atoswpseveral', 'atoswpsprint', 'atoswp3xcb'].each(function(m) {
         pConfig.trackMethod(m);
     });
 	
@@ -81,6 +81,16 @@ AtosConfig.prototype = {
                     switcher: 'atoswpseveral',
                     fieldset: 'atoswpseveral',
                     backendConfig : $H(<?php echo $this->getElementBackendConfig($this->getElement('atos_global_atoswpseveral')); ?>)
+                }),
+                atoswpsprint: $H({
+                    switcher: 'atoswpsprint',
+                    fieldset: 'atoswpsprint',
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig($this->getElement('atos_global_atoswpsprint')); ?>)
+                }),
+                atoswp3xcb: $H({
+                    switcher: 'atoswp3xcb',
+                    fieldset: 'atoswp3xcb',
+                    backendConfig : $H(<?php echo $this->getElementBackendConfig($this->getElement('atos_global_atoswp3xcb')); ?>)
                 })
         });
         this.disabledMethods = [];

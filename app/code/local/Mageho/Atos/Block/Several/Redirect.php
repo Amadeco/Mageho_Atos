@@ -19,21 +19,43 @@
  
 class Mageho_Atos_Block_Several_Redirect extends Mage_Core_Block_Template
 {
+    /**
+     * Payment method code
+     * @var string
+     */
+    protected $_methodCode = Mageho_Atos_Model_Config::METHOD_ATOS_SIPS_PAYMENT_SEVERAL;
+    
+	protected $_model;
+    
     protected function _toHtml()
     {
-		$several = Mage::getModel('atos/method_several');
-		$several->callRequest();
+		$this->_model = Mage::getModel('atos/method_several');
+		$this->_model->callRequest();
 		
-		if ($several->getError()) 
+		if ($this->_model->getError()) 
 		{
-		    return '<pre>'.$several->getSystemHtml().'</pre>';
+		    return '<pre>'.$this->_model->getSystemHtml().'</pre>';
 		} else {
-			$this->setSelectedMethod(Mage::getSingleton('atos/session')->getAtosSeveralPaymentMeans())
-				->setSystemFormUrl($several->getSystemUrl())
-				->setSystemHtml($several->getSystemHtml())
+			$this->setSelectedMethod($this->_model->getAtosSession()->getData($this->getMethodCode() . '_payment_means'))
+				->setSystemFormUrl($this->_model->getSystemUrl())
+				->setSystemHtml($this->_model->getSystemHtml())
 				->setTemplate('mageho/atos/several/redirect.phtml');
 					
 			return parent::_toHtml();
 		}
+    }
+
+    /**
+     * Payment method code getter
+     * @return string
+     */
+    public function getMethodCode()
+    {
+        return $this->_methodCode;
+    }
+    
+    public function getSeveralPaymentModel()
+    {
+	    return $this->_model;
     }
 }

@@ -19,6 +19,9 @@
 
 class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 {
+	protected $_error = false;
+	protected $_debug;
+	
 	/* Response label from bank */
 	const RESPONSE_AUTHORIZATION_ACCEPTED = 'Authorization accepted';
 	const RESPONSE_PERMISSION_DENIED = 'Permission denied';
@@ -26,6 +29,7 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	const RESPONSE_PAYMENT_CANCELED_CUSTOMER = 'Payment canceled by the customer';
 	const RESPONSE_FORMAT_ERROR = 'Format error';
 	const RESPONSE_NUMBER_ATTEMPTS_CREDIT_CARD_NUMBER_EXCEEDED = 'Number of attempts to enter the card number exceeded';
+	const RESPONSE_SECURITY_RULES_NOT_RESPECTED = 'Safety rules not followed, arrested transaction';
 	const RESPONSE_SERVICE_TEMPORARILY_UNAVAILABLE = 'Service temporarily unavailable';
 	const RESPONSE_TRANSACTION_ALREADY_REGISTERED = 'Transaction already registered';
 	
@@ -103,9 +107,6 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 	const TRANSACTION_CONDITION_3D_ATTEMPT = 'The merchant and the cardholder is enrolled in the 3-D Secure program but the buyer did not have to authenticate (the bank access control server that issued the card does not implement the generation of proof of authentication attempt)';
 	const TRANSACTION_CONDITION_SSL = 'The buyer has not authenticated to one of the following reasons: 1- The type of card is not supported by the program 3-D Secure 2- The merchant or the cardholder is not enrolled in the program 3-D Secure';
 	
-	protected $_error = false;
-	protected $_debug;
-	
 	/*
 		API ERROR : Error reading pathfile (no key word F_DEFAULT)
 		
@@ -140,11 +141,12 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			
 			return $hash;
 		} catch (Exception $e) {
-			$this->_error = true;
-			$this->_debug = $e->getMessage();
 			
-			Mage::getSingleton('atos/debug')->log($this->_debug);
-			Mage::helper('checkout')->sendPaymentFailedEmail($this->getQuote(), $this->_debug);
+			$this->setError(true)
+				->setDebug($e->getMessage());
+			
+			Mage::getSingleton('atos/debug')->debugData($e->getMessage());
+			Mage::helper('checkout')->sendPaymentFailedEmail($this->getQuote(), $e->getMessage());
 		}
     }
 
@@ -272,6 +274,8 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 				return $hlpr->__(self::RESPONSE_FORMAT_ERROR);
 			case '75':
 				return $hlpr->__(self::RESPONSE_NUMBER_ATTEMPTS_CREDIT_CARD_NUMBER_EXCEEDED);
+			case '63':
+				return $hlpr->__(self::RESPONSE_SECURITY_RULES_NOT_RESPECTED);
 			case '90':
 				return $hlpr->__(self::RESPONSE_SERVICE_TEMPORARILY_UNAVAILABLE);
 			case '94':
@@ -528,5 +532,29 @@ class Mageho_Atos_Model_Api_Response extends Mageho_Atos_Model_Config
 			    return '##' . $cc[1];
 			}
 		}
+	}
+	
+	public function setError($error)
+	{
+		$this->_error = $error;
+		
+		return $this;
+	}
+	
+	public function getError()
+	{
+		return $this->_error;
+	}
+	
+	public function setDebug($debug)
+	{
+		$this->_debug = $debug;
+		
+		return $this;
+	}
+	
+	public function getDebug()
+	{
+		return $this->_debug;
 	}
 }

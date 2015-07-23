@@ -22,17 +22,22 @@
 ?>
 <?php if ($_paymentMeans): ?>
 <fieldset id="payment_form_<?php echo $_code; ?>" class="form-list" style="display:none">
-    <div class="atos-select-cards well">
-    	<p class="choc"><?php echo $this->__('Select a credit card'); ?></p>
+    <div class="atos-select-cards well m0">
+    	<p class="help-block text-center"><?php echo $this->__('Select a credit card'); ?></p>
         <ol>
             <?php foreach($_paymentMeans as $key => $value): ?>
             <li>
-               <input type="radio" name="payment[atos_several_payment_means]" value="<?php echo $key; ?>" id="<?php echo $value['id']; ?>" class="atos_cc validate-one-required-by-name" <?php if ($this->getSelectedMethod() == $key): ?>checked="checked"<?php endif; ?> />
-               <label for="<?php echo $value['id']; ?>"><img src="<?php echo $value['src']; ?>" alt="<?php echo $value['alt']; ?>" /></label>
+            	<label for="<?php echo $value['id']; ?>">
+					<input type="radio" name="payment[<?php echo $_code; ?>_payment_means]" value="<?php echo $key; ?>" id="<?php echo $value['id']; ?>" class="atos_cc validate-one-required-by-name" <?php if ($this->getSelectedMethod() == $key): ?>checked="checked"<?php endif; ?> />
+					<img src="<?php echo $value['src']; ?>" alt="<?php echo $value['alt']; ?>" title="<?php echo $value['alt']; ?>" />
+				</label>
             </li>
             <?php endforeach; ?>
         </ol>
     </div>
+    
+    <br />
+    
     <div class="atos-cms-block"><?php echo $this->getCmsBlock(); ?></div>
 </fieldset>
 <?php endif; ?>

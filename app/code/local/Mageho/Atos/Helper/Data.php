@@ -19,6 +19,17 @@
 
 class Mageho_Atos_Helper_Data extends Mage_Core_Helper_Abstract
 {
+	public function isAdmin()
+    {
+        if (Mage::app()->getStore()->isAdmin()) {
+            return true;
+        }
+        if (Mage::getDesign()->getArea() == 'adminhtml') {
+            return true;
+        }
+        return false;
+    }
+    
 	public function getNbPayment()
 	{
 		return (int) Mage::getSingleton('atos/method_several')->getConfig()->nb_payment;	

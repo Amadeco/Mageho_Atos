@@ -14,30 +14,48 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 -->
 <layout version="0.1.0">
-    <atos_standard_redirect>
+    <atos_payment_standard_redirect>
 		<update handle="atos_core_redirect" />
 		<reference name="content">
 		    <block type="atos/standard_redirect" name="atos.standard.redirect" />
 		</reference>
-	</atos_standard_redirect>
-    <atos_several_redirect>
+	</atos_payment_standard_redirect>
+    <atos_payment_several_redirect>
 		<update handle="atos_core_redirect" />
 		<reference name="content">
 		    <block type="atos/several_redirect" name="atos.several.redirect" />
 		</reference>
-	</atos_several_redirect>
+	</atos_payment_several_redirect>
+    <atos_payment_sprint_redirect>
+		<update handle="atos_core_redirect" />
+		<reference name="content">
+		    <block type="atos/sprint_redirect" name="atos.sprint.redirect" />
+		</reference>
+	</atos_payment_sprint_redirect>
+    <atos_payment_3xcb_redirect>
+		<update handle="atos_core_redirect" />
+		<reference name="content">
+		    <block type="atos/3xcb_redirect" name="atos.3xcb.redirect" />
+		</reference>
+	</atos_payment_3xcb_redirect>
 	
-    <atos_standard_failure>
+    <atos_payment_standard_failure>
 		<update handle="atos_core_failure" />
-    </atos_standard_failure>
-    <atos_several_failure>
+    </atos_payment_standard_failure>
+    <atos_payment_several_failure>
 		<update handle="atos_core_failure" />
-    </atos_several_failure>
+    </atos_payment_several_failure>
+    <atos_payment_sprint_failure>
+		<update handle="atos_core_failure" />
+    </atos_payment_sprint_failure>
+    <atos_payment_3xcb_failure>
+		<update handle="atos_core_failure" />
+    </atos_payment_3xcb_failure>
 	
 	<checkout_cart_index>
 		<update handle="atos_core_stylesheet" />
@@ -86,7 +104,8 @@
 			<action method="addCss"><stylesheet>css/mageho/atos/atos.css</stylesheet></action>
 		</reference>
 	</atos_core_stylesheet>
-    
+	
+    <!--
 	<PRODUCT_TYPE_simple>
 		<reference name="product.info.simple.extra">
 			<block type="atos/several_catalog" name="atos.financing" before="-">
@@ -96,4 +115,5 @@
 			</block>
 		</reference>
 	</PRODUCT_TYPE_simple>
+	-->
 </layout>

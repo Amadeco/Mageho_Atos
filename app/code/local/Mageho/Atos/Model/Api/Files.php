@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
@@ -27,6 +27,8 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 		'014213245611111' => 'Sogenactif',
 		'038862749811111' => 'CyberPlus',
 		'082584341411111' => 'Mercanet',
+		'011223344551111' => 'Mercanet',
+		'011223344551112' => 'Mercanet avec 3DSecure',
 		'014141675911111' => 'Scellius',
 		'014295303911111' => 'Sherlocks',
 		'000000014005555' => 'Aurore Cetelem'

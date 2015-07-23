@@ -22,14 +22,14 @@
 ?>
 <?php if ($_paymentMeans): ?>
 <fieldset id="payment_form_<?php echo $_code; ?>" class="form-list" style="display:none">
-    <div class="atos-select-cards well">
-    	<p class="choc"><?php echo $this->__('Select a credit card'); ?></p>
+    <div class="atos-select-cards well m0">
+    	<p class="help-block text-center"><?php echo $this->__('Select a credit card'); ?></p>
         <ol>
             <?php foreach($_paymentMeans as $key => $value): ?>
             <li>
             	<label for="<?php echo $value['id']; ?>">
-					<input type="radio" name="payment[atos_standard_payment_means]" value="<?php echo $key; ?>" id="<?php echo $value['id']; ?>" class="atos_cc validate-one-required-by-name" <?php if ($this->getSelectedMethod() == $key): ?>checked="checked"<?php endif; ?> />
-					<img src="<?php echo $value['src']; ?>" alt="<?php echo $value['alt']; ?>" />
+					<input type="radio" name="payment[<?php echo $_code; ?>_payment_means]" value="<?php echo $key; ?>" id="<?php echo $value['id']; ?>" class="atos_cc validate-one-required-by-name" <?php if ($this->getSelectedMethod() == $key): ?>checked="checked"<?php endif; ?> />
+					<img src="<?php echo $value['src']; ?>" alt="<?php echo $value['alt']; ?>" title="<?php echo $value['alt']; ?>" />
 				</label>
             </li>
             <?php endforeach; ?>
@@ -53,20 +53,15 @@
 	    
 	    <script>
 		/* <![CDATA[ */
-	        var atosAuroreMethod = $('<?php echo $_code ?>_atos_cc_aurore');
-	        if (atosAuroreMethod) 
-	        {
-		        if (atosAuroreMethod.checked === false) 
-		        {
+	        var atosAuroreMethod = $('<?php echo $_code ?>_cc_aurore');
+	        if (atosAuroreMethod) {
+		        if (atosAuroreMethod.checked === false) {
 		        	$('atos_aurore_dob').hide();
 		        }
 		        
-		        $$('.atos_cc').each(function(element) 
-		        {
-			        element.observe('change', function() 
-			        {
-				        if (this.id == atosAuroreMethod.id) 
-				        {
+		        $$('.atos_cc').each(function(element) {
+			        element.observe('change', function() {
+				        if (this.id == atosAuroreMethod.id) {
 				    		$('atos_aurore_dob').toggle();
 					    } else {
 						    $('atos_aurore_dob').hide();
@@ -81,6 +76,9 @@
 	   <?php endif; ?>
 	   
     </div>
+    
+    <br />
+    
     <div class="atos-cms-block"><?php echo $this->getCmsBlock(); ?></div>
 </fieldset>
 <?php endif; ?>

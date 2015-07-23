@@ -37,7 +37,7 @@ class Mageho_Atos_Block_Standard_Info extends Mage_Payment_Block_Info
 	
 	public function getSelectedMethod()
 	{		
-	    return $this->getMethod()->getAtosSession()->getAtosStandardPaymentMeans();
+	    return $this->getMethod()->getAtosSession()->getData($this->getMethod()->getCode() . '_payment_means');
 	}
 	
 	public function isOrderPlacedFromFrontend()

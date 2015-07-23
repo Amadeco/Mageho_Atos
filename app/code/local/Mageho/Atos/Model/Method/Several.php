@@ -48,7 +48,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
     
 	public function callRequest()
     {
-		$datafieldToAdd = array(
+		$fields = array(
 			'NB_PAYMENT' => $this->_getNbPayment(),
 			'PERIOD' => 30,
 			'INITIAL_AMOUNT' => $this->_getFirstAmount()
@@ -62,14 +62,14 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
 			'customer_id' => $this->_getCustomerId(),
 			'customer_email' => $this->_getCustomerEmail(),
 			'customer_ip_address' => $this->_getCustomerIpAddress(),
-			'payment_means' => $this->getPaymentMeans(),
+			'payment_means' => implode(',2,', $this->getPaymentMeans()) . ',2',
 			'normal_return_url' => $this->_getNormalReturnUrl(),
 			'cancel_return_url' => $this->_getCancelReturnUrl(),
 			'automatic_response_url' => $this->_getAutomaticResponseUrl(),
 			'templatefile' => $this->getConfig()->templatefile,
 			'capture_mode' => 'PAYMENT_N',
 			'capture_day' => '0',
-			'cmd' => $this->getConfig()->getDatafield($datafieldToAdd)
+			'cmd' => $this->getConfig()->getDatafield($fields)
 		);
 		
 		$request = new Mageho_Atos_Model_Api_Request($params);
@@ -77,10 +77,6 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
         if ($request->getError()) {
 			$this->_error = true;
 	        $this->_html = $request->getDebug();
-			
-			if ($this->getDebug()->getRequestCmd()) {
-				$this->_html.= "\n\n" . $this->getDebug()->getRequestCmd();
-			}
 		} else {
 			$this->_error = false;
 	        $this->_url = $request->getUrl();
@@ -100,7 +96,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
      */
     public function _getNormalReturnUrl()
     {
-        return Mage::getUrl('atos/several/normal', array('_secure' => true));
+        return Mage::getUrl('atos/payment_several/normal', array('_secure' => true));
     }
 		 
     /**
@@ -110,7 +106,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
      */
     public function _getCancelReturnUrl()
     {
-        return Mage::getUrl('atos/several/cancel', array('_secure' => true));
+        return Mage::getUrl('atos/payment_several/cancel', array('_secure' => true));
     }
 	
     /**
@@ -120,7 +116,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
      */
     public function _getAutomaticResponseUrl()
     {
-        return Mage::getUrl('atos/automatic/index', array('_secure' => true));
+        return Mage::getUrl('atos/payment_several/automatic', array('_secure' => true));
     }
 
     /**
@@ -130,7 +126,7 @@ class Mageho_Atos_Model_Method_Several extends Mageho_Atos_Model_Method_Abstract
      */
     public function getOrderPlaceRedirectUrl()
     {
-        return Mage::getUrl('atos/several/redirect', array('_secure' => true));
+        return Mage::getUrl('atos/payment_several/redirect', array('_secure' => true));
     }
     
     protected function _getNbPayment()

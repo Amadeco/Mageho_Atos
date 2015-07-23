@@ -257,7 +257,7 @@
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
                         </atoswps>
-						<atoswpseveral>
+						<atoswpseveral translate="label comment">
                             <label>Atos Website Payment Several</label>
                             <comment><![CDATA[Payment Method to accept payment several times. You must be very watchful : check expiration date of credit card, location and customer's info.]]></comment>
                             <config_path>payment/atoswpseveral/active</config_path>
@@ -267,6 +267,26 @@
                             <show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
 						</atoswpseveral>
+						<atoswpsprint translate="label comment">
+                            <label>Atos Website Payment Sprint Secure</label>
+                            <comment><![CDATA[Franfinance offers SPRINT SOLUTION SECURE payment method to credit to finance purchases on the Internet.]]></comment>
+                            <config_path>payment/atoswpsprint/active</config_path>
+                            <frontend_type>checkbox</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</atoswpsprint>
+						<atoswp3xcb translate="label comment">
+                            <label>Atos Website Payment 3xCB Franfinance</label>
+                            <comment><![CDATA[Franfinance offers 3XCB payment method FRANFINANCE credit to finance purchases on the Internet.]]></comment>
+                            <config_path>payment/atoswp3xcb/active</config_path>
+                            <frontend_type>checkbox</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</atoswp3xcb>
                     </fields>
                 </global>
                 <atoswps translate="label comment">
@@ -480,6 +500,219 @@
                         </max_order_total>
 					</fields>
 				</atoswpseveral>
+                <atoswpsprint translate="label comment">
+                    <label>Atos Website Payment Sprint Secure</label>
+                    <fieldset_css>atos-config</fieldset_css>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>70</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <authentication_chain translate="label comment">
+                            <label>Authentification Chain</label>
+                            <comment><![CDATA[Allows authentication partner (String provided by FRANFINANCE)]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </authentication_chain>
+                        <style_route translate="label comment">
+                            <label>Code style route</label>
+                            <comment><![CDATA[Allows customizing the colors of screens partner (code provided by FRANFINANCE)]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </style_route>
+                        <pre_capture_bin translate="label comment">
+	                        <label>Pre-capture Bin Acceptance</label>
+                            <comment><![CDATA[By default, the BIN code may be added is the most common value for FRANFINANCE cards: 503206.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>25</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </pre_capture_bin>
+                        <icon translate="label comment">
+                        	<label>Payment Method Icon</label>
+                        	<comment><![CDATA[Icon is displayed in the selection of payment methods for clarity.]]></comment>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">atos</upload_dir>
+                            <base_url type="media" scope_info="1">atos</base_url>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </icon>
+                        <allowspecific translate="label">
+                            <label>Payment from applicable countries</label>
+                            <frontend_type>allowspecific</frontend_type>
+                            <sort_order>40</sort_order>
+                            <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
+                            <show_in_default>0</show_in_default>
+                            <show_in_website>0</show_in_website>
+							<show_in_store>0</show_in_store>
+                        </allowspecific>
+                        <specificcountry translate="label">
+                            <label>Payment from Specific countries</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <depends><allowspecific>1</allowspecific></depends>
+                            <sort_order>50</sort_order>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>0</show_in_default>
+                            <show_in_website>0</show_in_website>
+							<show_in_store>0</show_in_store>
+                        </specificcountry>
+                        <sort_order translate="label">
+                            <label>Sort order</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </sort_order>
+                        <min_order_total translate="label comment">
+                            <label>Minimum Order Total</label>
+                            <comment><![CDATA[A minimum order total is mandatory for this payment module works.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </max_order_total>
+                    </fields>
+                </atoswpsprint>
+                <atoswp3xcb translate="label comment">
+                    <label>Atos Website Payment 3xCB Franfinance</label>
+                    <fieldset_css>atos-config</fieldset_css>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>80</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>0</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <authentication_chain translate="label comment">
+                            <label>Authentification Chain</label>
+                            <comment><![CDATA[Allows authentication partner (String provided by FRANFINANCE)]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </authentication_chain>
+                        <style_route translate="label comment">
+                            <label>Code style route</label>
+                            <comment><![CDATA[Allows customizing the colors of screens partner (code provided by FRANFINANCE)]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </style_route>
+                        <timer translate="label comment">
+	                        <label>Timer</label>
+                            <comment><![CDATA[Timer for the automatic redirection to the merchant's site (from 0 to 300 seconds)]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </timer>
+                        <pre_capture_bin translate="label comment">
+	                        <label>Pre-capture Bin Acceptance</label>
+                            <comment><![CDATA[By default, the BIN code may be added is the most common value for FRANFINANCE cards: 503206.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>35</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </pre_capture_bin>
+                        <icon translate="label comment">
+                        	<label>Payment Method Icon</label>
+                        	<comment><![CDATA[Icon is displayed in the selection of payment methods for clarity.]]></comment>
+                            <frontend_type>image</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_image</backend_model>
+                            <upload_dir config="system/filesystem/media" scope_info="1">atos</upload_dir>
+                            <base_url type="media" scope_info="1">atos</base_url>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </icon>
+                        <allowspecific translate="label">
+                            <label>Payment from applicable countries</label>
+                            <frontend_type>allowspecific</frontend_type>
+                            <sort_order>50</sort_order>
+                            <source_model>adminhtml/system_config_source_payment_allspecificcountries</source_model>
+                            <show_in_default>0</show_in_default>
+                            <show_in_website>0</show_in_website>
+							<show_in_store>0</show_in_store>
+                        </allowspecific>
+                        <specificcountry translate="label">
+                            <label>Payment from Specific countries</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <depends><allowspecific>1</allowspecific></depends>
+                            <sort_order>60</sort_order>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>0</show_in_default>
+                            <show_in_website>0</show_in_website>
+							<show_in_store>0</show_in_store>
+                        </specificcountry>
+                        <sort_order translate="label">
+                            <label>Sort order</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </sort_order>
+                        <min_order_total translate="label comment">
+                            <label>Minimum Order Total</label>
+                            <comment><![CDATA[A minimum order total is mandatory for this payment module works.]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </min_order_total>
+                        <max_order_total translate="label">
+                            <label>Maximum Order Total</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>90</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </max_order_total>
+                    </fields>
+                </atoswp3xcb>
             </groups>
 		</atos>
     </sections>

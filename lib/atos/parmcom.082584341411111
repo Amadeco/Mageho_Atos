@@ -1,0 +1,61 @@
+
+###############################################################################
+#
+# Fichier des paramètres du commercant
+#
+# Remarque : Ce fichier paramètre est sous la responsabilité du commercant
+#
+###############################################################################
+#
+# URL de retour automatique de la reponse du paiement
+AUTO_RESPONSE_URL!!
+#
+# URL de traitement d'un paiement refusé
+CANCEL_URL!!
+#
+# URL de retour suite à un paiement accepté
+RETURN_URL!!
+#
+# Logo central
+ADVERT!!
+#
+# Nom du fichier en fond d'écran des pages de paiement
+BACKGROUND!!
+#
+# Logo d'annulation (affichage d'un bouton si non renseigné)
+CANCEL_LOGO!!
+#
+# Liste des cartes acceptées par le commercant
+CARD_LIST!CB,MASTERCARD,VISA,AMEX,DINERS,JCB,DELTA,SWITCH,SOLO,AURORE,COFINOGA,FINAREF,PAYLIB,PAYPAL!
+#
+# Code devise (978=EURO)
+CURRENCY!978!
+#
+# Code langage de l'acheteur (fr=francais)
+LANGUAGE!fr!
+#
+# Le logo du commercant (s'affiche en haut à gauche de la page de paiement)
+LOGO!!
+#
+# Le logo du commercant (s'affiche en haut à droite de la page de paiement)
+LOGO2!!
+#
+# Code pays du commercant
+MERCHANT_COUNTRY!fr!
+#
+# Code langage du commercant
+MERCHANT_LANGUAGE!fr!
+#
+# Liste des moyens de paiement acceptés
+PAYMENT_MEANS!CB,2,MASTERCARD,2,VISA,2,AMEX,2,DINERS,2,JCB,2,DELTA,2,SWITCH,2,SOLO,2,AURORE,2,COFINOGA,2,FINAREF,2,PAYLIB,2,PAYPAL,2!
+#
+# Logo de retour a la boutique apres le paiement (bouton si non renseigné)
+RETURN_LOGO!!
+#
+# Logo de validation du paiement (affichage d'un bouton si non renseigné)
+SUBMIT_LOGO!!
+#
+# Fichier template
+TEMPLATE!!
+#
+# END OF FILE

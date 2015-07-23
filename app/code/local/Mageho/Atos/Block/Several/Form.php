@@ -13,7 +13,7 @@
  * @category     Mageho
  * @package     Mageho_Atos
  * @author       Mageho, Ilan PARMENTIER <contact@mageho.com>
- * @copyright   Copyright (c) 2015  Mageho (http://www.mageho.com)
+ * @copyright   Copyright (c) 2014  Mageho (http://www.mageho.com)
  * @license      http://www.opensource.org/licenses/OSL-3.0  Open Software License (OSL 3.0)
  */
 
@@ -24,28 +24,7 @@ class Mageho_Atos_Block_Several_Form extends Mage_Payment_Block_Form
     protected function _construct()
     {
         parent::_construct();
-        
-        $quote = Mage::getSingleton('checkout/session')->getQuote();
-        if ($quote) {
-	        $totals = $quote->getTotals();
-	        $total = $totals['grand_total']->getValue();
-	        
-	        $nb = Mage::helper('atos')->getNbPayment();	
-	        $term = $total / $nb;
-	
-	        $additional = Mage::getConfig()->getBlockClassName('core/template');
-	        $additional = new $additional;
-	        
-	        $additional->setTerm($term)
-	        	->setNb($nb)
-	        	->setTotal($total)
-	        	->setTemplate('mageho/atos/several/form.additional.phtml');
-	        
-	        $this->setMethodLabelAfterHtml($additional->toHtml());
-        }
-        
         $this->setTemplate('mageho/atos/several/form.phtml');
-            
         return parent::_construct();
     }
 
@@ -54,7 +33,7 @@ class Mageho_Atos_Block_Several_Form extends Mage_Payment_Block_Form
 		if (empty($this->_paymentMeans)) {
 			foreach ($this->getMethod()->getPaymentMeans() as $key => $value) {
 				$this->_paymentMeans[$value] = array(
-					'id' => $this->getMethodCode() . '_atos_cc_' . str_replace(' ', '_', strtolower($value)),
+					'id' => $this->getMethodCode() . '_cc_' . str_replace(' ', '_', strtolower($value)),
 					'src' => Mage::getSingleton('atos/config')->getCardIcon(strtolower($value)),
 					'alt' => ucwords(strtolower($value))
 				);
@@ -65,12 +44,12 @@ class Mageho_Atos_Block_Several_Form extends Mage_Payment_Block_Form
 	
 	public function getSelectedMethod()
 	{		
-	    return $this->getMethod()->getAtosSession()->getAtosSeveralPaymentMeans();
+	    return $this->getMethod()->getAtosSession()->getData($this->getMethodCode() . '_payment_means');
 	}
 	
 	public function getCmsBlock()
 	{
-		$blockId = $this->getMethod()->getConfig()->cms_block;
+		$blockId = $this->getMethod()->getConfigData('cms_block');
 		
         $block = Mage::getConfig()->getBlockClassName('cms/block');
         $block = new $block;

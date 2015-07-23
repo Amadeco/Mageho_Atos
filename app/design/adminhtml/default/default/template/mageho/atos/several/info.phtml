@@ -20,7 +20,7 @@
  	$hash = unserialize($this->getInfo()->getAdditionalData());
  	$apiResponse = Mage::getSingleton('atos/api_response');
  	$paymentN = $apiResponse->paymentN($hash);
- 	$hlpr = Mage::helper('atos'); 
+ 	$hlpr = $this->helper('atos');
 ?>
 
 <div id="atos-logo">&nbsp;</div>

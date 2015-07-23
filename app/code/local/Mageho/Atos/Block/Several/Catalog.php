@@ -32,7 +32,7 @@ class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 	
 	public function getCmsBlockUrl()
 	{
-		return Mage::getUrl('atos/several/information');
+		return Mage::getUrl('atos/method_several/information');
 	}
 	
 	protected function _prepareLayout() 
@@ -106,8 +106,4 @@ class Mageho_Atos_Block_Several_Catalog extends Mage_Catalog_Block_Product_View
 		
 		return $finalProductPrice;
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/master
