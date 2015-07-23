@@ -66,7 +66,7 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 				return $directoryPath . $pathfileFilename;
 			}
 		} else {
-			Mage::getSingleton('atos/debug')->log('I have a problem to get your pathfile name - Check your configured merchant id in your back-office. Do not forget : you must have certificate files in your atos directory.');
+			Mage::getSingleton('atos/debug')->debugData('I have a problem to get your pathfile name - Check your configured merchant id in your back-office. Do not forget : you must have certificate files in your atos directory.');
 			return;	
 		}
     }
@@ -152,7 +152,7 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 		if (empty($certificates)) {
 			$message = Mage::helper('atos')->__('No certificates found');
 			$certificates[] = $message;
-			Mage::getSingleton('atos/debug')->log($message);
+			Mage::getSingleton('atos/debug')->debugData($message);
 		}
 	    return $certificates;
     }
@@ -166,7 +166,7 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 	{
 		$parmcom = self::_getLibFiles('parmcom');
         if (empty($parmcom)) {
-			Mage::getSingleton('atos/debug')->log("Parcom files doesn't exist");
+			Mage::getSingleton('atos/debug')->debugData("Parcom files doesn't exist");
         	return false;
 		}
         return $parmcom;
@@ -183,7 +183,7 @@ class Mageho_Atos_Model_Api_Files extends Mageho_Atos_Model_Config
 	    $directoryPath = self::getLibDir();
 		
 		if (! is_dir($directoryPath)) {
-			Mage::getSingleton('atos/debug')->log($directoryPath . ' is not a directory');
+			Mage::getSingleton('atos/debug')->debugData($directoryPath . ' is not a directory');
         	return false;
 		}
 
