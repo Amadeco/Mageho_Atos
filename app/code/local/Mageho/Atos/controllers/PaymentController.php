@@ -616,6 +616,7 @@ class Mageho_Atos_PaymentController extends Mage_Core_Controller_Front_Action
 		catch (Exception $e) {
 		}
     }
+<<<<<<< HEAD:app/code/local/Mageho/Atos/controllers/PaymentController.php
 
 	public function getAtosResponse($key = null) 
 	{
@@ -644,3 +645,7 @@ class Mageho_Atos_PaymentController extends Mage_Core_Controller_Front_Action
         return $checked;
     }
 }
+=======
+ }
+}
+>>>>>>> origin/master:app/code/local/Mageho/Atos/Controller/Action.php
