@@ -129,23 +129,20 @@ class Mageho_Atos_Model_Api_Request extends Mageho_Atos_Model_Config
 		
 		$request.= ' order_id=' . $params['order_id'];
 		
-		if (! $this->getConfig()->isTestMode())
+		if (isset($params['templatefile']) && !empty($params['templatefile'])) {
+	        $request.= ' templatefile=' . $params['templatefile'];
+		}
+			
+		if (isset($params['capture_mode'], $params['capture_day']) 
+			&& in_array($params['capture_mode'], array('AUTHOR_CAPTURE', 'PAYMENT_N'))
+			&& ($params['capture_day'] >= 0 && $params['capture_day'] <= 99)) 
 		{
-			if (isset($params['templatefile']) && !empty($params['templatefile'])) {
-	            $request.= ' templatefile=' . $params['templatefile'];
-			}
+	        $request.= ' capture_mode=' . $params['capture_mode'];
+	        $request.= ' capture_day=' . $params['capture_day'];
+		}
 			
-			if (isset($params['capture_mode'], $params['capture_day']) 
-				&& in_array($params['capture_mode'], array('AUTHOR_CAPTURE', 'PAYMENT_N'))
-				&& ($params['capture_day'] >= 0 && $params['capture_day'] <= 99)) 
-			{
-	            $request.= ' capture_mode=' . $params['capture_mode'];
-	            $request.= ' capture_day=' . $params['capture_day'];
-			}
-			
-			if (isset($params['cmd'])) {
-	            $request.= $params['cmd'];
-	        }
+		if (isset($params['cmd'])) {
+			$request.= $params['cmd'];
 	    }
 		
 		$this->setRequest($request);

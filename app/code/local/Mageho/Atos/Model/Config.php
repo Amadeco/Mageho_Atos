@@ -438,7 +438,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 				$data = '#' . substr(trim($ff3xcb->getConfigData('authentication_chain')), 0, 512) . '#';
 				$data.= substr(trim($ff3xcb->getConfigData('style_route')), 0, 5) . '####';
 				$data.= substr(trim($ff3xcb->getConfigData('timer')), 0, 3) . '##';
-				$data.= substr(trim($sprint->getConfigData('pre_capture_bin')), 0, 6) . '#';
+				$data.= substr(trim($ff3xcb->getConfigData('pre_capture_bin')), 0, 6) . '#';
 			}
 	        
 	        // Doit etre sous la forme => Mr, Mme, Mle
