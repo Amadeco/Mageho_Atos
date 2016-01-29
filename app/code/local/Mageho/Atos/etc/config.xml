@@ -439,7 +439,6 @@
 			</atoswpseveral>
 			<atoswpsprint translate="title" module="atos">
 				<title><![CDATA[Atos Website Payment Sprint Secure]]></title>
-				<authentication_chain><![CDATA[a=2YR2iYbQGac%3D&b=t8h%2BYYtg26s%3D&c=0TNJC5J%2B%2FAo%3D&d=AuNEkWGzrx4%3D]]></authentication_chain>
 				<style_route>stor</style_route>
 				<pre_capture_bin>503206</pre_capture_bin>
 				<allowspecific>1</allowspecific>
@@ -448,7 +447,6 @@
 			</atoswpsprint>
 			<atoswp3xcb translate="title" module="atos">
 				<title><![CDATA[Atos Website Payment 3xCB Franfinance]]></title>	
-				<authentication_chain><![CDATA[a=1YR2iYbQGac%3D&b=t7h%2BYYtg26s%3D&c=0TNJC5J%2B%2FAo%3D&d=AuNEkWGzrx4%3D]]></authentication_chain>
 				<style_route>stor</style_route>
 				<timer>5</timer>
 				<pre_capture_bin>503206</pre_capture_bin>
