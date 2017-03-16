@@ -36,9 +36,9 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	
 	/* 
 	 * Ce mode de capture est dangereux
-	 * Si on oublie de valider la transaction sur le BO de la banque, pas de débit, si supérieur à 7 jours, le débit n'est plus autorisé, la banque fait une nouvelle demande d'autorisation
+	 * Si on oublie de valider la transaction sur le BO de la banque, pas de dÃ©bit, si supÃ©rieur Ã  7 jours, le dÃ©bit n'est plus autorisÃ©, la banque fait une nouvelle demande d'autorisation
 	 * 
-	 * Si activé, ne pas oublier d'enlever le champs depends du fichier system.xml du champs "capture_day" 
+	 * Si activÃ©, ne pas oublier d'enlever le champs depends du fichier system.xml du champs "capture_day" 
 	 */
     const PAYMENT_ACTION_AUTHORIZE = 'VALIDATION';
 	
@@ -184,7 +184,6 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
         switch ($action) {
             case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE:
                 return self::PAYMENT_ACTION_AUTHORIZE;
-            default:
             case Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE_CAPTURE:
                 return self::PAYMENT_ACTION_AUTHORIZE_CAPTURE;
         }
@@ -250,7 +249,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 	
     /*
-     * Récupère un tableau des devises autorisées
+     * RÃ©cupÃ¨re un tableau des devises autorisÃ©es
      *
      * @return array $currencies
      */
@@ -283,7 +282,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /*
-     * Récupère un tableau des langages autorisées
+     * RÃ©cupÃ¨re un tableau des langages autorisÃ©es
      *
      * @return array $languages
      */
@@ -321,7 +320,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
     }
 
     /*
-     * Récupère un tableau des modes de paiement autorisés
+     * RÃ©cupÃ¨re un tableau des modes de paiement autorisÃ©s
      *
      * @return array $paymentMeans
      */
@@ -346,7 +345,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 	}
 	
     /*
-     * Récupère un tableau des mots clés du champ data 
+     * RÃ©cupÃ¨re un tableau des mots clÃ©s du champ data 
      *
      * @return array $datafields
      */
@@ -378,7 +377,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		
 		if ($paymentMeans = $this->getAtosSession()->getData(self::METHOD_ATOS_SIPS_PAYMENT_STANDARD . '_payment_means')) {
 			switch ($paymentMeans) {
-				/* Donnée spécifique Aurore: Date de naissance */
+				/* DonnÃ©e spÃ©cifique Aurore: Date de naissance */
 				case 'AURORE':
 					if ($dob = $this->_getCustomerDob()) {
 						$datafield['DATE_NAISSANCE'] = $dob;
@@ -387,8 +386,8 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 					break;
 					
 				/* 
-				 * Donnée spécifique PayPal: Le numéro de commande PayPal
-				 * PP_INVOICEID : ce champ doit faire au maximum 127 caractères et contenir des caractères alpha-numériques
+				 * DonnÃ©e spÃ©cifique PayPal: Le numÃ©ro de commande PayPal
+				 * PP_INVOICEID : ce champ doit faire au maximum 127 caractÃ¨res et contenir des caractÃ¨res alpha-numÃ©riques
 				 */
 				case 'PAYPAL':
 					if ($orderId = $this->_getOrderId() && ctype_digit($orderId)) {
@@ -401,7 +400,7 @@ class Mageho_Atos_Model_Config extends Mageho_Atos_Model_Abstract
 		/*
 		 *
 		 * Sogenactif solutions
-		 * Société générale
+		 * SociÃ©tÃ© gÃ©nÃ©rale
 		 * Sprint Secure & 3XCB
 		 *
 		 */
