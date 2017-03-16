@@ -151,6 +151,6 @@ class Mageho_Atos_Model_Method_Standard extends Mageho_Atos_Model_Method_Abstrac
      */
     protected function _getCaptureMode()
     {
-        return $this->getConfig()->getPaymentAction($this->getConfigData('capture_mode'));
+        return $this->getConfig()->getPaymentAction($this->getConfigData('payment_action'));
     }
 }
